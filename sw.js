@@ -1,6 +1,6 @@
 // Golden service worker: offline menu after the first visit, light on data.
 // Bump VERSION when you upload changed files so returning visitors get them.
-const VERSION = 'golden-v15';
+const VERSION = 'golden-v16';
 const SHELL_CACHE = `${VERSION}-shell`;
 const IMG_CACHE = `${VERSION}-img`;
 const IMG_LIMIT = 80;
