@@ -1,6 +1,6 @@
 /* Admin demo — light working surface on top of the site's tokens and components (main.css). */
 
-body.adm { background: #F1E7D8; color: var(--ink); padding-bottom: calc(84px + var(--safe-b)); }
+body.adm { color-scheme: only light; background: #F1E7D8; color: var(--ink); padding-bottom: calc(84px + var(--safe-b)); }
 
 .adm-top {
   position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 12px;

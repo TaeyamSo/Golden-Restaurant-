@@ -36,7 +36,13 @@ function register() {
   });
 }
 
-/** Every [data-install] button (top bar + footer) installs the app, or explains how when the browser can't prompt. */
+/**
+ * The "نزّل التطبيق" buttons (top bar + footer) show for everyone and act per browser:
+ *  - Google Chrome: its own install prompt. Chrome is the only Android browser whose installed app Google builds;
+ *    others (Samsung Internet included) build one for old Android versions, which Play Protect blocks.
+ *  - Safari on iPhone: the "Add to Home Screen" steps (Safari makes a plain home-screen shortcut, no app package).
+ *  - Any other browser: copy the link / open the page in Chrome.
+ */
 function setupInstall() {
   const btns = [...document.querySelectorAll('[data-install]')];
   const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
@@ -51,63 +57,70 @@ function setupInstall() {
   });
   window.addEventListener('appinstalled', () => { show(false); sheet.toast('تمام! صار غولدن عشاشتك'); });
 
-  const ua = navigator.userAgent;
-  const isIOS = /iphone|ipad|ipod/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  const isAndroid = /android/i.test(ua);
-  const list = (steps) => `<ol class="sheet-text" style="padding-inline-start:20px;display:grid;gap:10px;margin:0 0 8px">${steps.map((s) => `<li>${s}</li>`).join('')}</ol>`;
-
   btns.forEach((btn) => btn.addEventListener('click', async () => {
-    // checked before the browser's own prompt: some browsers that build blocked packages offer one too
-    if (isAndroid && !safeAndroidInstaller()) { openInChromeSheet(); return; }
-    if (deferred) {
+    if (isGoogleChrome()) {
+      if (!deferred) { sheet.toast('التطبيق منزّل عندك، دوّر عليه بشاشة الموبايل'); return; }
       deferred.prompt();
       await deferred.userChoice.catch(() => {});
       deferred = null;
       return;
     }
-    if (isIOS) {
-      sheet.open({
-        title: 'نزّل غولدن عموبايلك',
-        body: list(['اكبس على زر المشاركة بأسفل Safari (المربع مع السهم لفوق).', 'نزال لتحت واختار <b>"إضافة إلى الشاشة الرئيسية"</b>.', 'اكبس <b>إضافة</b>، وصار المنيو عشاشتك، وبيفتح حتى لو النت ضعيف.']),
-        foot: '<button class="btn btn-dark btn-block" type="button" data-close>تمام</button>',
-      });
-      return;
-    }
-    sheet.open({
-      title: 'نزّل غولدن عموبايلك',
-      body: list(['افتح قائمة المتصفح (النقاط التلاتة ⋮ فوق).', 'اختار <b>"تثبيت التطبيق"</b> أو <b>"إضافة إلى الشاشة الرئيسية"</b>.', 'أكّد، وصار المنيو عشاشتك، وبيفتح حتى لو النت ضعيف.']),
-      foot: '<button class="btn btn-dark btn-block" type="button" data-close>تمام</button>',
-    });
+    if (isSafari()) { safariSheet(); return; }
+    chromeSheet();
   }));
 }
 
-/**
- * On Android, "installing" a site makes the browser package it as an app. Chrome, Edge and Samsung Internet build
- * that package through an up-to-date service; some other browsers build it for old Android versions, and Google Play
- * Protect then blocks it as "built for an older version of Android". So only those three get install steps.
- */
-function safeAndroidInstaller() {
+const UA = navigator.userAgent;
+const isIOS = () => /iphone|ipad|ipod/i.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isAndroid = () => /android/i.test(UA);
+
+/** Google Chrome itself — not Samsung Internet, Edge, Opera, Brave or other browsers built on Chrome's engine. */
+function isGoogleChrome() {
+  if (isIOS()) return false;
   const brands = (navigator.userAgentData?.brands || []).map((b) => b.brand);
-  if (brands.length) return brands.some((b) => /^(Google Chrome|Microsoft Edge|Samsung Internet)$/.test(b));
-  const ua = navigator.userAgent;
-  if (/SamsungBrowser|EdgA/.test(ua)) return true;
-  // plain Chrome: a Chrome UA without another browser's marker or the in-app WebView flag
-  return /Chrome\/\d+/.test(ua) && !/; wv\)|OPR|Opera|UCBrowser|MiuiBrowser|XiaoMi|HeyTap|OppoBrowser|VivoBrowser|YaBrowser|Vivaldi|PHX|Phoenix|Firefox|FBAN|FBAV|Instagram/.test(ua);
+  if (brands.length) return brands.includes('Google Chrome');
+  // older phones without userAgentData: a Chrome UA without another browser's marker or the in-app WebView flag
+  return /Chrome\/\d+/.test(UA) && !/; wv\)|SamsungBrowser|Edg|OPR|Opera|UCBrowser|MiuiBrowser|XiaoMi|HeyTap|OppoBrowser|VivoBrowser|YaBrowser|Vivaldi|Brave|PHX|Phoenix|Firefox|FBAN|FBAV|Instagram/.test(UA);
 }
 
-/** Other Android browsers: send the visitor to Chrome, where the install is safe. */
-function openInChromeSheet() {
+/** Safari on iPhone/iPad (not Chrome, Firefox or an app's built-in browser there). */
+const isSafari = () => isIOS() && /Safari\//.test(UA) && !/CriOS|FxiOS|EdgiOS|OPiOS|GSA\/|FBAN|FBAV|Instagram|Line\//.test(UA);
+
+const list = (steps) => `<ol class="sheet-text" style="padding-inline-start:20px;display:grid;gap:10px;margin:0 0 8px">${steps.map((s) => `<li>${s}</li>`).join('')}</ol>`;
+
+function safariSheet() {
+  sheet.open({
+    title: 'نزّل غولدن عموبايلك',
+    body: list(['اكبس على زر المشاركة بأسفل Safari (المربع مع السهم لفوق).', 'نزال لتحت واختار <b>"إضافة إلى الشاشة الرئيسية"</b>.', 'اكبس <b>إضافة</b>، وصار المنيو عشاشتك، وبيفتح حتى لو النت ضعيف.']),
+    foot: '<button class="btn btn-dark btn-block" type="button" data-close>تمام</button>',
+  });
+}
+
+/** Other browsers: copy the link for Chrome, or (Android) open the page straight in Chrome. */
+function chromeSheet() {
   const url = location.href.split('#')[0];
+  // Android intent link: opens this page in Chrome, or stays on the page if Chrome isn't installed
   const intent = `intent://${url.replace(/^https?:\/\//, '')}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(url)};end`;
   sheet.open({
-    title: 'نزّلو من Google Chrome',
-    body: `<p class="sheet-text">المتصفح يلي فاتح منو هلّق بيعمل نسخة قديمة من التطبيق، وGoogle بيمنعها وبيطلع تحذير. هالشي من المتصفح مو من الموقع، والموقع آمن.</p>
-      <p class="sheet-text">افتح الموقع بـ <b>Google Chrome</b> ونزّل التطبيق من هناك، بيتنزّل بدون أي تحذير.</p>`,
-    foot: `<a class="btn btn-gold btn-block" href="${intent}">افتح بـ Chrome</a>
-      <button class="btn btn-ghost-ink btn-block" type="button" data-copy-link>انسخ رابط الموقع</button>`,
+    title: 'نزّل التطبيق من Google Chrome',
+    body: '<p class="sheet-text">انسخ رابط الموقع والصقو بـ Google Chrome، ونزّل التطبيق من هناك.</p>',
+    foot: `<button class="btn btn-gold btn-block" type="button" data-copy-link>انسخ الرابط</button>
+      ${isAndroid() ? `<a class="btn btn-ghost-ink btn-block" href="${intent}">افتح بـ Chrome</a>` : ''}`,
     onMount(el) {
-      el.querySelector('[data-copy-link]').onclick = async () => {
-        try { await navigator.clipboard.writeText(url); sheet.toast('انتسخ الرابط، الصقو بـ Chrome'); } catch { sheet.toast(url); }
+      const b = el.querySelector('[data-copy-link]');
+      b.onclick = async () => {
+        let ok = false;
+        try { await navigator.clipboard.writeText(url); ok = true; } catch {
+          // older browsers: copy through a temporary text field
+          const ta = Object.assign(document.createElement('textarea'), { value: url });
+          ta.style.cssText = 'position:fixed;opacity:0';
+          document.body.appendChild(ta);
+          ta.select();
+          ok = document.execCommand('copy');
+          ta.remove();
+        }
+        if (ok) b.textContent = 'انتسخ ✓';
+        else sheet.toast(url);
       };
     },
   });
