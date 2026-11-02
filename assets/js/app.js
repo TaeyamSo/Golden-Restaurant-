@@ -11,6 +11,7 @@ const $ = (id) => document.getElementById(id);
 const hashStore = () => (location.hash.match(/^#menu\/([\w-]+)/) || [])[1];
 
 async function main() {
+  setupTheme();
   let loaded;
   try {
     loaded = await loadData();
@@ -96,6 +97,28 @@ function renderFooter(data) {
   $('footerSocial').innerHTML = data.stores.map((s) =>
     `<a class="social" href="${esc(s.facebook)}" target="_blank" rel="noopener"><svg><use href="#i-fb"/></svg><span dir="ltr">${esc(s.nameEn)}</span>${mockTag(s, 'facebook')}</a>`).join('') +
     `<a class="social" href="${esc(data.brand.instagram)}" target="_blank" rel="noopener"><svg><use href="#i-ig"/></svg>إنستغرام${mockTag(data.brand, 'instagram')}</a>`;
+}
+
+/* ---------- light / dark switch: only in the installed app ---------- */
+// The inline script in index.html already applied the saved choice (light by default).
+function setupTheme() {
+  const G = window.__golden || {};
+  const btn = $('themeBtn');
+  if (!G.app || !G.setTheme) return;
+  const paint = () => {
+    const dark = document.documentElement.classList.contains('dark');
+    // the icon shows where a tap takes you
+    btn.innerHTML = `<svg><use href="#i-${dark ? 'sun' : 'moon'}"/></svg>`;
+    btn.setAttribute('aria-label', dark ? 'الوضع الفاتح' : 'الوضع الغامق');
+  };
+  btn.addEventListener('click', () => {
+    const dark = !document.documentElement.classList.contains('dark');
+    G.setTheme(dark, true);
+    try { localStorage.setItem('golden.appTheme', dark ? 'dark' : 'light'); } catch { /* private mode: lasts until the app closes */ }
+    paint();
+  });
+  paint();
+  btn.hidden = false;
 }
 
 /* ---------- header: transparent over the hero, hides on scroll down ---------- */

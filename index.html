@@ -114,14 +114,30 @@
       var d = document, h = d.documentElement, G = window.__golden = {};
       h.classList.add('js');
       if (/[?&]clean\b/.test(location.search)) h.classList.add('hide-mock');
-      // Google Chrome always gets the light design, even on a dark-mode phone: it honours "only light" and won't
-      // repaint the page. Other browsers (Samsung Internet…) keep our dark design, since they would force-darken it.
+      // Light/dark: the menu and order panels have a dark design too (html.dark).
+      // - The installed app starts light and has a switch; its choice is saved.
+      // - Google Chrome always shows light, even on a dark-mode phone: it honours a fixed "only light" and won't repaint.
+      // - Other browsers (Samsung Internet…) follow the phone with our dark design, since they would force-darken the page.
       var ua = navigator.userAgent, brands = ((navigator.userAgentData || {}).brands || []).map(function (b) { return b.brand; });
       var chrome = /CriOS/.test(ua) || (brands.length ? brands.indexOf('Google Chrome') > -1
         : /Chrome\/\d+/.test(ua) && !/; wv\)|SamsungBrowser|Edg|OPR|Opera|UCBrowser|MiuiBrowser|XiaoMi|HeyTap|OppoBrowser|VivoBrowser|YaBrowser|Vivaldi|Brave|PHX|Phoenix|Firefox|FBAN|FBAV|Instagram/.test(ua));
-      if (chrome) {
-        h.classList.add('light-only');
-        d.querySelector('meta[name="color-scheme"]').setAttribute('content', 'only light');
+      var app = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+      var meta = d.querySelector('meta[name="color-scheme"]'), phoneDark = window.matchMedia && matchMedia('(prefers-color-scheme: dark)');
+      G.app = app;
+      // fixed: tell the browser this is the final look, so it never darkens the page on top
+      G.setTheme = function (dark, fixed) {
+        h.classList.toggle('dark', dark);
+        var scheme = fixed ? (dark ? 'only dark' : 'only light') : 'light dark';
+        h.style.colorScheme = fixed ? scheme : '';
+        meta.setAttribute('content', scheme);
+      };
+      if (app) {
+        var saved = null; try { saved = localStorage.getItem('golden.appTheme'); } catch (e) {}
+        G.setTheme(saved === 'dark', true);
+      } else if (chrome) G.setTheme(false, true);
+      else if (phoneDark) {
+        G.setTheme(phoneDark.matches, false);
+        if (phoneDark.addEventListener) phoneDark.addEventListener('change', function (e) { G.setTheme(e.matches, false); });
       }
       // start the GOLDEN animation once its (tiny, preloaded) font is ready, so the letters never swap mid-way
       var go = function () { h.classList.add('ld-go'); };
@@ -221,6 +237,8 @@
     <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M19 12H5m0 0 5.5-5.5M5 12l5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="11.5" height="11.5" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15.5 8V6.5A2 2 0 0 0 13.5 4.5h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2H8" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
     <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M19.5 14.5A7.5 7.5 0 0 1 9.5 4.5a7.5 7.5 0 1 0 10 10Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5v2.2M12 19.3v2.2M21.5 12h-2.2M4.7 12H2.5M18.7 5.3l-1.6 1.6M6.9 17.1l-1.6 1.6M18.7 18.7l-1.6-1.6M6.9 6.9 5.3 5.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
     <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19.5h14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
     <symbol id="i-trash" viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M7 7l1 12.5h8L17 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
   </svg>
@@ -237,6 +255,7 @@
     </nav>
     <div class="top-actions">
       <button class="nav-install" type="button" data-install hidden><svg><use href="#i-download"/></svg><span>نزّل التطبيق</span></button>
+      <button class="icon-btn" type="button" id="themeBtn" hidden><svg><use href="#i-moon"/></svg></button>
       <button class="icon-btn cart-btn" type="button" data-open-order aria-label="طلبك">
         <svg><use href="#i-bag"/></svg>
         <span class="badge" id="cartBadge" hidden>0</span>

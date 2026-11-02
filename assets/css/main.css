@@ -65,42 +65,39 @@
 }
 
 /* The site supports dark mode itself, so browsers with "force dark" leave it alone instead of repainting it.
-   Most of the page is already dark; only the paper surfaces change. Google Chrome is kept light
-   (html.light-only, set by the inline script in index.html). */
+   Most of the page is already dark; only the paper surfaces change. html.dark is set by the inline script in
+   index.html: the app's switch, light in Google Chrome, else the phone's setting. */
 :root { color-scheme: light dark; }
-html.light-only { color-scheme: only light; }
-@media (prefers-color-scheme: dark) {
-  html:not(.light-only) body:not(.adm) {
-    --paper-bg: #211712;
-    --paper-sheet: #2A1D16;
-    --paper-card: #33241B;
-    --paper-ink: #F2E6D3;
-    --paper-ink-2: rgba(242, 230, 211, .74);
-    --paper-ink-3: rgba(242, 230, 211, .52);
-    --paper-line: rgba(242, 230, 211, .12);
-    --paper-accent: var(--gold);
-    --paper-btn: var(--gold);
-    --paper-btn-ink: #1E1410;
-    --paper-btn-hover: var(--gold-hi);
-    --paper-count-bg: #1E1410;
-    --paper-count-ink: var(--gold-hi);
-    --paper-soft: #3A2A20;
-    --paper-soft-2: #4A3226;
-    --paper-sel: #3A2A20;
-    --paper-sel-border: var(--gold);
-    --paper-media: #2E2018;
-    --paper-tint: #3A2A20;
-    --paper-hover: rgba(242, 230, 211, .08);
-    --paper-grab: rgba(242, 230, 211, .25);
-    --paper-nav: rgba(33, 23, 18, .97);
-    --paper-nav-blur: rgba(33, 23, 18, .86);
-    --paper-ok: #8CCB86;
-    --paper-off: #E6957F;
-    --mock-ink: #E8B98B;
-    --mock-bg: rgba(232, 185, 139, .08);
-    --mock-border: rgba(232, 185, 139, .4);
-    --receipt-bg: #EDE3D2; /* the receipt stays paper, just softer in a dark room */
-  }
+html.dark body:not(.adm) {
+  --paper-bg: #211712;
+  --paper-sheet: #2A1D16;
+  --paper-card: #33241B;
+  --paper-ink: #F2E6D3;
+  --paper-ink-2: rgba(242, 230, 211, .74);
+  --paper-ink-3: rgba(242, 230, 211, .52);
+  --paper-line: rgba(242, 230, 211, .12);
+  --paper-accent: var(--gold);
+  --paper-btn: var(--gold);
+  --paper-btn-ink: #1E1410;
+  --paper-btn-hover: var(--gold-hi);
+  --paper-count-bg: #1E1410;
+  --paper-count-ink: var(--gold-hi);
+  --paper-soft: #3A2A20;
+  --paper-soft-2: #4A3226;
+  --paper-sel: #3A2A20;
+  --paper-sel-border: var(--gold);
+  --paper-media: #2E2018;
+  --paper-tint: #3A2A20;
+  --paper-hover: rgba(242, 230, 211, .08);
+  --paper-grab: rgba(242, 230, 211, .25);
+  --paper-nav: rgba(33, 23, 18, .97);
+  --paper-nav-blur: rgba(33, 23, 18, .86);
+  --paper-ok: #8CCB86;
+  --paper-off: #E6957F;
+  --mock-ink: #E8B98B;
+  --mock-bg: rgba(232, 185, 139, .08);
+  --mock-border: rgba(232, 185, 139, .4);
+  --receipt-bg: #EDE3D2; /* the receipt stays paper, just softer in a dark room */
 }
 /* the receipt is always light paper: its contents use the light values whatever the theme */
 .receipt {
