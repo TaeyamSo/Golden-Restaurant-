@@ -114,6 +114,15 @@
       var d = document, h = d.documentElement, G = window.__golden = {};
       h.classList.add('js');
       if (/[?&]clean\b/.test(location.search)) h.classList.add('hide-mock');
+      // Google Chrome always gets the light design, even on a dark-mode phone: it honours "only light" and won't
+      // repaint the page. Other browsers (Samsung Internet…) keep our dark design, since they would force-darken it.
+      var ua = navigator.userAgent, brands = ((navigator.userAgentData || {}).brands || []).map(function (b) { return b.brand; });
+      var chrome = /CriOS/.test(ua) || (brands.length ? brands.indexOf('Google Chrome') > -1
+        : /Chrome\/\d+/.test(ua) && !/; wv\)|SamsungBrowser|Edg|OPR|Opera|UCBrowser|MiuiBrowser|XiaoMi|HeyTap|OppoBrowser|VivoBrowser|YaBrowser|Vivaldi|Brave|PHX|Phoenix|Firefox|FBAN|FBAV|Instagram/.test(ua));
+      if (chrome) {
+        h.classList.add('light-only');
+        d.querySelector('meta[name="color-scheme"]').setAttribute('content', 'only light');
+      }
       // start the GOLDEN animation once its (tiny, preloaded) font is ready, so the letters never swap mid-way
       var go = function () { h.classList.add('ld-go'); };
       if (d.fonts && d.fonts.load) { d.fonts.load('600 64px "Reem Kufi Loader"', 'GOLDEN').then(go, go); setTimeout(go, 700); } else go();

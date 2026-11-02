@@ -65,10 +65,12 @@
 }
 
 /* The site supports dark mode itself, so browsers with "force dark" leave it alone instead of repainting it.
-   Most of the page is already dark; only the paper surfaces change. */
+   Most of the page is already dark; only the paper surfaces change. Google Chrome is kept light
+   (html.light-only, set by the inline script in index.html). */
 :root { color-scheme: light dark; }
+html.light-only { color-scheme: only light; }
 @media (prefers-color-scheme: dark) {
-  body:not(.adm) {
+  html:not(.light-only) body:not(.adm) {
     --paper-bg: #211712;
     --paper-sheet: #2A1D16;
     --paper-card: #33241B;
