@@ -128,10 +128,37 @@ async function handwriting(word, { cls, label, pad }) {
   const runRaw = raw.reduce((n, r, i) => n + (items[i].dab ? 0 : r), 0);
   const k = (WRITE_TIME - fixed) / runRaw;
 
+  // Each pen run may only uncover its own letters (غو / لد / ن): a brush's round end near a neighbouring letter
+  // would otherwise show a sliver of it early. So every run gets its own mask over just its glyphs.
+  const bbox = (d) => {
+    const n = d.match(/-?\d+(?:\.\d+)?/g).map(Number); // placed paths are plain x y pairs
+    const xs = n.filter((_, i) => i % 2 === 0), ys = n.filter((_, i) => i % 2 === 1);
+    return { x1: Math.min(...xs), x2: Math.max(...xs), y1: Math.min(...ys), y2: Math.max(...ys) };
+  };
+  const runs = items.map((it, i) => (it.run ? i : -1)).filter((i) => i >= 0);
+  const runRange = new Map(runs.map((i) => {
+    const xs = items[i].strokes.flatMap((s) => s.pts.map((p) => p[0]));
+    return [i, [Math.min(...xs), Math.max(...xs)]];
+  }));
+  const glyphBox = word.glyphs.map((g) => bbox(g.d));
+  const glyphRun = glyphBox.map((b) => runs.reduce((best, r) => {
+    const [a, z] = runRange.get(r);
+    const overlap = Math.min(b.x2, z) - Math.max(b.x1, a);
+    return overlap > best.overlap ? { r, overlap } : best;
+  }, { r: runs[0], overlap: -Infinity }).r);
+  const groupOf = (it) => {
+    if (it.run) return items.indexOf(it);
+    const g = glyphBox.findIndex((b) => it.cx >= b.x1 && it.cx <= b.x2 && it.cy >= b.y1 && it.cy <= b.y2);
+    return g >= 0 ? glyphRun[g] : runs[0];
+  };
+
   let t = WRITE_START;
-  const mask = [], tips = [], debug = [];
+  const masks = new Map(runs.map((r) => [r, []]));
+  const tips = [], debug = [];
+  let pieces = 0;
   items.forEach((it, idx) => {
     if (idx) t += LIFT;
+    const mask = masks.get(groupOf(it));
     if (it.dab) {
       mask.push(`<circle class="ld-dab" cx="${it.cx}" cy="${it.cy}" r="${it.r}" fill="#fff" style="--s:${t.toFixed(3)}s"/>`);
       debug.push({ dab: it });
@@ -148,6 +175,7 @@ async function handwriting(word, { cls, label, pad }) {
         const a = t + D * easeInv(done / L), b = t + D * easeInv(Math.min(1, (done + len) / L));
         const timing = `--s:${a.toFixed(3)}s;--t:${Math.max(0.01, b - a).toFixed(3)}s`;
         mask.push(`<path class="ld-pen" pathLength="1" stroke-width="${s.width}" style="${timing}" d="${fmt(piece)}"/>`);
+        pieces++;
         // the pen tip rides the same piece on the same CSS timing (offset-path), so it never drifts from the ink
         tips.push(`<circle class="ld-tip" r="${(s.width * 0.42).toFixed(1)}" style="${timing};offset-path:path('${fmt(piece)}')"/>`);
         done += len;
@@ -162,13 +190,13 @@ async function handwriting(word, { cls, label, pad }) {
     '<stop offset="0" stop-color="#B98A2F"/><stop offset=".44" stop-color="#E2BE6A"/><stop offset=".5" stop-color="#FFF0C4"/><stop offset=".56" stop-color="#E2BE6A"/><stop offset="1" stop-color="#B98A2F"/>' +
     `<animateTransform attributeName="gradientTransform" type="translate" from="${vb.w} 0" to="${-vb.w} 0" dur="1.3s" begin="${(done + 0.15).toFixed(2)}s" fill="freeze"/></linearGradient>` +
     '<radialGradient id="ldTipGlow"><stop offset="0" stop-color="#FFF6DA"/><stop offset=".45" stop-color="#F0D58A" stop-opacity=".9"/><stop offset="1" stop-color="#E2BE6A" stop-opacity="0"/></radialGradient>' +
-    // .ld-all softly fills any tiny tips the centerlines missed, as the pen finishes
-    `<mask id="ldInk" maskUnits="userSpaceOnUse" x="${vb.x}" y="${vb.y}" width="${vb.w}" height="${vb.h}">${mask.join('')}` +
-    `<rect class="ld-all" x="${vb.x}" y="${vb.y}" width="${vb.w}" height="${vb.h}" fill="#fff" style="--s:${(done - 0.05).toFixed(2)}s"/></mask>`;
-  const glyphs = word.glyphs.map((g) => `<path d="${g.d}"/>`).join('');
+    // one mask per pen run; .ld-all softly fills any tiny tips the centerlines missed, as the pen finishes
+    runs.map((r) => `<mask id="ldInk${r}" maskUnits="userSpaceOnUse" x="${vb.x}" y="${vb.y}" width="${vb.w}" height="${vb.h}">${masks.get(r).join('')}` +
+      `<rect class="ld-all" x="${vb.x}" y="${vb.y}" width="${vb.w}" height="${vb.h}" fill="#fff" style="--s:${(done - 0.05).toFixed(2)}s"/></mask>`).join('');
+  const groups = runs.map((r) => `<g mask="url(#ldInk${r})">${word.glyphs.filter((_, g) => glyphRun[g] === r).map((g) => `<path d="${g.d}"/>`).join('')}</g>`).join('');
   const svg = `<svg class="${cls}" viewBox="${vb.x} ${vb.y} ${vb.w} ${vb.h}" role="img" aria-label="${label}"><defs>${defs}</defs>` +
-    `<g mask="url(#ldInk)" fill="url(#ldShine)">${glyphs}</g>${tips.join('')}</svg>`;
-  return { svg, debug, vb, done, pieces: mask.length };
+    `<g fill="url(#ldShine)">${groups}</g>${tips.join('')}</svg>`;
+  return { svg, debug, vb, done, pieces };
 }
 
 /** Optional check image: letters in grey, each pen stroke in its own colour with its order number, dots ringed. */
