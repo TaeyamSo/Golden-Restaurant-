@@ -27,7 +27,7 @@ Edit `data/menu.json` directly. Alternatively, use **admin → الإعدادا�
 ## Dev tools (`tools/`, not needed on the server)
 
 - `npm install`, then `npm run media`: rebuilds `assets/img`, `assets/video` and the icons from `imgvid/` (including the stock photos in `imgvid/stock/`).
-- `node brand-svg.mjs`: rebuilds the loading-screen wordmark (غولدن in Aref Ruqaa + GOLDEN) as inline SVG in `index.html`.
+- `node brand-svg.mjs`: rebuilds the loading-screen wordmark (غولدن + GOLDEN, both in Reem Kufi) as inline SVG in `index.html`.
 - `node fetch-fonts.mjs`: re-downloads the self-hosted fonts.
 - `node shot.mjs`: takes phone-size screenshots with local Chrome, for visual checks.
 

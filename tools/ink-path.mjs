@@ -116,9 +116,18 @@ export async function inkStrokes(paths, box, { height = 420 } = {}) {
     }).sort((a, b) => b.x2 - a.x2).forEach((d) => order.push(d));
   }
 
-  const strokes = [];
+  const toUser = ([x, y]) => [box.x + (x + 0.5) / s, box.y + (y + 0.5) / s];
+  const items = [];
   for (const c of order) {
     const key = (x, y) => y * W + x;
+    // dots: their skeleton collapses to a point, so the pen just dabs them, sized from the thickest pixel
+    if (isDot(c)) {
+      const [cx, cy] = c.px.reduce((a, b) => (dist[key(...b)] > dist[key(...a)] ? b : a));
+      const r = Math.max(...c.px.map(([x, y]) => dist[key(x, y)]));
+      const [ux, uy] = toUser([cx, cy]);
+      items.push({ dab: true, cx: +ux.toFixed(1), cy: +uy.toFixed(1), r: +((r * 1.35 + 2) / s).toFixed(1) });
+      continue;
+    }
     const deg = (x, y) => nbrs(x, y).length;
     const usedStep = new Set(); // undirected pixel steps already drawn
     const stepKey = (a, b) => (key(...a) < key(...b) ? `${key(...a)}-${key(...b)}` : `${key(...b)}-${key(...a)}`);
@@ -167,24 +176,26 @@ export async function inkStrokes(paths, box, { height = 420 } = {}) {
       const thick = Math.max(...run.map(([x, y]) => dist[key(x, y)]));
       own.push({ pts: simplify(run, 1.2), thick, len: run.length, right: Math.max(...run.map((p) => p[0])) });
     }
-    // within a letter group, side branches are written where they sit, so the ink keeps moving right to left
-    own.sort((a, b) => b.right - a.right).forEach((st) => strokes.push(st));
-    strokes.push({ lift: true });
-  }
-
-  // drop skeleton spurs that are shorter than the stroke is thick (thinning noise at letter ends)
-  const toUser = ([x, y]) => [box.x + (x + 0.5) / s, box.y + (y + 0.5) / s];
-  const out = [];
-  for (const st of strokes) {
-    if (st.lift) { if (out.length && !out[out.length - 1].lift) out.push({ lift: true }); continue; }
-    if (st.len < st.thick * 0.9) continue;
-    const u = st.pts.map(toUser);
-    out.push({
-      d: `M${u.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join('L')}`,
-      width: +((st.thick * 2 + 3) / s).toFixed(1),
-      length: st.len / s,
+    // within a letter group, side branches are written where they sit, so the ink keeps moving right to left.
+    // Skeleton spurs shorter than ~the stroke's thickness are thinning noise at letter tips: dropped.
+    // (measured against the group's full stroke thickness: a spur's own tip is always thin)
+    const groupThick = Math.max(...own.map((st) => st.thick));
+    const kept = own.filter((st) => st.len >= groupThick * 0.9).sort((a, b) => b.right - a.right);
+    if (!kept.length) continue;
+    items.push({
+      run: true,
+      strokes: kept.map((st) => {
+        const u = st.pts.map(toUser);
+        return {
+          pts: u,
+          // tight brush: just the letter's thickness plus a pixel, so neighbouring strokes aren't revealed early
+          width: +((st.thick * 2 + 1.5) / s).toFixed(1),
+          length: st.len / s,
+        };
+      }),
     });
   }
-  if (out.length && out[out.length - 1].lift) out.pop();
-  return { strokes: out, debug: { W, H, s, sk, order: order.map((c) => c.id) } };
+  // items, in writing order: { run, strokes: [{ pts, width, length }] } for each connected letter group
+  // (one pen-down), and { dab, cx, cy, r } for each dot
+  return { items, debug: { W, H, s, sk, order: order.map((c) => c.id) } };
 }
