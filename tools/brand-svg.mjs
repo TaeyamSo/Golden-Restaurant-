@@ -70,18 +70,18 @@ const viewBox = ({ box }, pad) => ({
 });
 
 /** GOLDEN: one <path> per letter, --i = its position, for the letter-by-letter rise. */
-function letters(word, { cls, label, pad }) {
+function letters(word, { cls, label, pad, rise }) {
   const vb = viewBox(word, pad);
   const order = word.glyphs.map((g, i) => [g.x, i]).sort((a, b) => a[0] - b[0]).map(([, i]) => i);
   const paths = word.glyphs.map((g, i) => `<path style="--i:${order.indexOf(i)}" d="${g.d}"/>`).join('');
-  return `<svg class="${cls}" viewBox="${vb.x} ${vb.y} ${vb.w} ${vb.h}" role="img" aria-label="${label}">${paths}</svg>`;
+  return `<svg class="${cls}" viewBox="${vb.x} ${vb.y} ${vb.w} ${vb.h}" role="img" aria-label="${label}" style="--rise:${rise.toFixed(2)}s">${paths}</svg>`;
 }
 
 // handwriting timing, in seconds from page start
-const WRITE_START = 0.25, WRITE_TIME = 1.9, LIFT = 0.14, DAB = 0.16;
+const WRITE_START = 0.25, WRITE_TIME = 2.9, LIFT = 0.14, DAB = 0.16;
 
 /** Pen speed over one pen-down: starts gently, flows, settles — but never fully stops. */
-const ease = (x) => 0.55 * x + 0.45 * (1 - Math.cos(Math.PI * x)) / 2;
+const ease = (x) => 0.7 * x + 0.3 * (1 - Math.cos(Math.PI * x)) / 2;
 function easeInv(y) {
   let lo = 0, hi = 1;
   for (let i = 0; i < 30; i++) { const m = (lo + hi) / 2; if (ease(m) < y) lo = m; else hi = m; }
@@ -121,8 +121,9 @@ function chunk(pts, max) {
 async function handwriting(word, { cls, label, pad }) {
   const vb = viewBox(word, pad);
   const { items } = await inkStrokes(word.glyphs.map((g) => g.d), vb);
-  // run duration grows sub-linearly with length so short strokes aren't rushed; then scale to the time budget
-  const raw = items.map((it) => (it.dab ? DAB : Math.pow(it.strokes.reduce((n, s) => n + polyLen(s.pts), 0), 0.85)));
+  // run duration follows its length (an even average pen speed, so the long first group isn't rushed); then
+  // scale everything to the time budget
+  const raw = items.map((it) => (it.dab ? DAB : it.strokes.reduce((n, s) => n + polyLen(s.pts), 0)));
   const fixed = items.filter((it) => it.dab).length * DAB + (items.length - 1) * LIFT;
   const runRaw = raw.reduce((n, r, i) => n + (items[i].dab ? 0 : r), 0);
   const k = (WRITE_TIME - fixed) / runRaw;
@@ -193,7 +194,7 @@ const en = shape(kufi, 'GOLDEN', 0.42);
 
 const written = await handwriting(ar, { cls: 'ld-ar', label: 'غولدن', pad: ar.upem * 0.04 });
 if (process.env.INK_DEBUG) await debugImage(process.env.INK_DEBUG, ar, written);
-const markup = [written.svg, letters(en, { cls: 'ld-en', label: 'GOLDEN', pad: en.upem * 0.02 })].join('\n    ');
+const markup = [written.svg, letters(en, { cls: 'ld-en', label: 'GOLDEN', pad: en.upem * 0.02, rise: written.done - 0.15 })].join('\n    ');
 
 const html = readFileSync(INDEX, 'utf8');
 const re = /(<!-- loader:start -->)[\s\S]*?(<!-- loader:end -->)/;
