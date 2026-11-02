@@ -31,8 +31,10 @@ async function main() {
   order.init(data);
   menu.init(data, hashStore());
   renderStores(data);
+  rowDots($('storesRow'), $('storeDots'));
   reels.init(data);
   renderVisit(data);
+  rowDots($('visitGrid'), $('visitDots'));
   renderFooter(data);
   setupHeader();
   setupReveal();
@@ -104,6 +106,20 @@ function setupHeader() {
 }
 
 /* ---------- reveal on scroll ---------- */
+/* ---------- swipe rows: position dots ---------- */
+function rowDots(row, dots) {
+  const cards = [...row.children];
+  dots.innerHTML = cards.map(() => '<i></i>').join('');
+  dots.firstElementChild?.classList.add('on');
+  if (!('IntersectionObserver' in window)) return;
+  const io = new IntersectionObserver((entries) => entries.forEach((en) => {
+    if (!en.isIntersecting || en.intersectionRatio < 0.6) return;
+    const i = cards.indexOf(en.target);
+    dots.querySelectorAll('i').forEach((d, j) => d.classList.toggle('on', j === i));
+  }), { root: row, threshold: 0.6 });
+  cards.forEach((c) => io.observe(c));
+}
+
 function setupReveal() {
   const els = document.querySelectorAll('[data-reveal]');
   if (!('IntersectionObserver' in window)) { els.forEach((el) => el.classList.add('in')); return; }
@@ -115,12 +131,14 @@ function setupReveal() {
 
 /* ---------- #menu/<store> links (store cards, PWA shortcuts, shared links) ---------- */
 function setupRouting() {
-  // handled in JS (not as a hash jump) so tapping the same store twice still scrolls, and the sticky nav is accounted for
+  // handled in JS (not as a hash jump) so tapping the same store twice still works, and the menu lands docked
   document.addEventListener('click', (e) => {
-    const a = e.target.closest('a[href^="#menu/"]');
+    const a = e.target.closest('a[href^="#menu/"], a[href="#menu"]');
     if (!a || e.defaultPrevented) return;
     e.preventDefault();
-    menu.select(a.getAttribute('href').split('/')[1], { scroll: true });
+    const id = a.getAttribute('href').split('/')[1];
+    if (id) menu.select(id, { scroll: true });
+    else menu.dock();
   });
   window.addEventListener('hashchange', () => {
     const id = hashStore();

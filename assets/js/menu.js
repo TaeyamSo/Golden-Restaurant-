@@ -15,7 +15,7 @@ export function init(d, initialStore) {
   render();
   $('storeTabs').addEventListener('click', (e) => {
     const t = e.target.closest('[data-store]');
-    if (t && t.dataset.store !== storeId) select(t.dataset.store, { scroll: true });
+    if (t && t.dataset.store !== storeId) select(t.dataset.store, { slide: true });
   });
   $('storeTabs').addEventListener('keydown', onTabKeys);
   $('catChips').addEventListener('click', (e) => {
@@ -25,51 +25,86 @@ export function init(d, initialStore) {
   $('menuList').addEventListener('click', onListClick);
   $('menuList').addEventListener('load', (e) => e.target.classList?.remove('lazy'), true);
   cart.subscribe(updateActions);
-  window.addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('resize', () => moveInk(false), { passive: true });
+  $('menuScroll').addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('scroll', checkDock, { passive: true });
+  window.addEventListener('resize', () => { moveInk(false); checkDock(); }, { passive: true });
+  checkDock();
 }
 
 export const current = () => storeId;
 
-/** Switch store. Called from tabs, store cards and #menu/<id> links. */
-export function select(id, { scroll = false, instant = false } = {}) {
+/**
+ * Switch store. Tabs slide the list sideways (the page itself doesn't move); store cards, the hero button and
+ * #menu/<id> links pass { scroll: true } to bring the menu panel onto the screen.
+ */
+export function select(id, { scroll = false, instant = false, slide = false } = {}) {
   if (!findStore(data, id)) return;
+  const ids = data.stores.map((s) => s.id);
+  const dir = ids.indexOf(id) > ids.indexOf(storeId) ? 1 : -1;
   const changed = id !== storeId;
   storeId = id;
   history.replaceState(history.state, '', `#menu/${id}`);
   if (changed) {
-    const swap = () => { render(); };
-    if (document.startViewTransition && !matchMedia('(prefers-reduced-motion: reduce)').matches) document.startViewTransition(swap);
-    else {
-      const list = $('menuList');
-      list.classList.add('swapping');
-      setTimeout(() => { swap(); list.classList.remove('swapping'); }, 180);
-    }
+    if (slide) slideTo(dir);
+    else { render(); $('menuScroll').scrollTop = 0; }
   }
   updateTabs();
-  if (scroll) scrollToMenuTop(instant);
+  if (scroll) dock(instant);
 }
 
-function scrollToMenuTop(instant) {
-  const strip = $('storeStrip');
-  const y = strip.getBoundingClientRect().top + scrollY;
-  const goingDown = y > scrollY;
-  // scrolling down hides the header, so the sticky nav sits at the very top; force that for instant jumps too
-  if (instant) {
-    document.getElementById('topbar').classList.add('away');
-    document.body.classList.add('header-away');
-  }
-  const offset = $('menuNav').offsetHeight + (goingDown || instant ? 0 : headerH()) + 4;
-  if (Math.abs(y - offset - scrollY) <= 8) return;
-  if (!instant) { window.scrollTo({ top: y - offset, behavior: 'smooth' }); return; }
+/* ---------- panel docking ---------- */
+// The panel only scrolls its products while it sits exactly on screen ("docked"); otherwise the page scrolls,
+// carrying it into place. At either end of the list, scrolling hands back to the page.
+const panel = () => $('menuPanel');
+const topbar = () => document.getElementById('topbar');
+
+function checkDock() {
+  const p = panel();
+  if (!p) return;
+  const top = p.getBoundingClientRect().top;
+  const docked = Math.abs(top) <= 2;
+  if (docked !== p.classList.contains('docked')) p.classList.toggle('docked', docked);
+  // the whole screen belongs to the menu while docked
+  if (docked) { topbar().classList.add('away'); document.body.classList.add('header-away'); }
+}
+
+/** Scroll the page so the menu panel fills the screen. */
+export function dock(instant = false) {
+  const y = panel().getBoundingClientRect().top + scrollY;
+  topbar().classList.add('away');
+  document.body.classList.add('header-away');
+  if (Math.abs(y - scrollY) <= 2) { checkDock(); return; }
+  if (!instant) { window.scrollTo({ top: y, behavior: 'smooth' }); return; }
   // html has scroll-behavior: smooth, so switch it off for the initial deep-link jump
   const root = document.documentElement;
   root.style.scrollBehavior = 'auto';
-  window.scrollTo(0, y - offset);
+  window.scrollTo(0, y);
   root.style.scrollBehavior = '';
+  checkDock();
 }
 
-const headerH = () => document.getElementById('topbar').offsetHeight;
+/* ---------- sideways slide between stores ---------- */
+let slideTimer;
+/** dir 1 = the new tab is further left (RTL "next"): old list leaves to the right, new one comes in from the left. */
+function slideTo(dir) {
+  const el = $('menuSlide');
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  clearTimeout(slideTimer);
+  if (reduce) { render(); $('menuScroll').scrollTop = 0; return; }
+  el.style.transition = 'transform .2s cubic-bezier(.55, 0, 1, .45), opacity .2s ease-in';
+  el.style.transform = `translateX(${dir * 28}%)`;
+  el.style.opacity = '0';
+  slideTimer = setTimeout(() => {
+    render();
+    $('menuScroll').scrollTop = 0; // reset while the list is invisible
+    el.style.transition = 'none';
+    el.style.transform = `translateX(${-dir * 28}%)`;
+    void el.offsetWidth;
+    el.style.transition = 'transform .34s cubic-bezier(.22, 1, .36, 1), opacity .3s ease-out';
+    el.style.transform = '';
+    el.style.opacity = '';
+  }, 200);
+}
 
 /* ---------- tabs ---------- */
 function renderTabs() {
@@ -105,7 +140,7 @@ function onTabKeys(e) {
   if (!(e.key in keys)) return;
   const ids = data.stores.map((s) => s.id);
   const next = ids[(ids.indexOf(storeId) + keys[e.key] + ids.length) % ids.length];
-  select(next);
+  select(next, { slide: true });
   document.getElementById(`tab-${next}`).focus();
 }
 
@@ -197,12 +232,12 @@ let spyLock = 0;
 function jumpTo(catId) {
   const sec = document.getElementById(`cat-${catId}`);
   if (!sec) return;
-  const y = sec.getBoundingClientRect().top + scrollY;
-  const goingDown = y > scrollY;
-  const offset = $('menuNav').offsetHeight + (goingDown ? 0 : headerH()) + 6;
+  const sc = $('menuScroll');
   setActiveChip(catId);
   spyLock = Date.now() + 900;
-  window.scrollTo({ top: y - offset, behavior: 'smooth' });
+  if (!panel().classList.contains('docked')) dock();
+  const top = sc.scrollTop + sec.getBoundingClientRect().top - sc.getBoundingClientRect().top - 8;
+  sc.scrollTo({ top, behavior: 'smooth' });
 }
 
 function setActiveChip(catId) {

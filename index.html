@@ -207,6 +207,7 @@
         <p class="lead">بلّشنا بفرن مناقيش، والناس حبّت الطعمة. فكبرت العيلة محل ورا محل.</p>
       </div>
       <div class="snap-row stores-row" id="storesRow"></div>
+      <div class="dots" id="storeDots" aria-hidden="true"></div>
     </section>
 
     <section class="section section-dark reels" id="reels" aria-labelledby="reelsTitle">
@@ -225,13 +226,18 @@
         <h2 id="menuTitle">شو جاي عبالك اليوم؟</h2>
         <p class="lead">اختار المحل، زيد يلي بدك ياه، ولما تخلص اتصل واطلب. كل محل إلو طلب لحال.</p>
       </div>
-      <div class="menu-nav" id="menuNav">
-        <div class="store-tabs" id="storeTabs" role="tablist" aria-label="المحلات"></div>
-        <div class="cat-chips" id="catChips" aria-label="الأقسام"></div>
-      </div>
-      <div class="wrap">
-        <div class="store-strip" id="storeStrip"></div>
-        <div class="menu-list" id="menuList" aria-live="polite"></div>
+      <!-- one screen tall: tabs + chips stay on top, the products scroll inside (see menu.js docking) -->
+      <div class="menu-panel" id="menuPanel">
+        <div class="menu-nav" id="menuNav">
+          <div class="store-tabs" id="storeTabs" role="tablist" aria-label="المحلات"></div>
+          <div class="cat-chips" id="catChips" aria-label="الأقسام"></div>
+        </div>
+        <div class="menu-scroll" id="menuScroll">
+          <div class="wrap menu-slide" id="menuSlide">
+            <div class="store-strip" id="storeStrip"></div>
+            <div class="menu-list" id="menuList" aria-live="polite"></div>
+          </div>
+        </div>
       </div>
     </section>
 
@@ -241,6 +247,7 @@
         <h2 id="visitTitle">وين تلاقونا.</h2>
       </div>
       <div class="snap-row visit-row" id="visitGrid"></div>
+      <div class="dots" id="visitDots" aria-hidden="true"></div>
       <!-- Reserved slot: creative 3D / real-photo map, to be planned with the owner. -->
       <p class="wrap sign" data-reveal><span class="sign-quote">كل الحب، عائلة غولدن.</span></p>
     </section>
