@@ -26,8 +26,10 @@ export function init(d, initialStore) {
   $('menuList').addEventListener('load', (e) => e.target.classList?.remove('lazy'), true);
   cart.subscribe(updateActions);
   $('menuScroll').addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('scroll', checkDock, { passive: true });
+  window.addEventListener('scroll', () => { checkDock(); scheduleSettle(); }, { passive: true });
   window.addEventListener('resize', () => { moveInk(false); checkDock(); }, { passive: true });
+  addEventListener('touchstart', () => { touching = true; clearTimeout(settleTimer); }, { passive: true });
+  addEventListener('touchend', () => { touching = false; scheduleSettle(); }, { passive: true });
   checkDock();
 }
 
@@ -53,24 +55,42 @@ export function select(id, { scroll = false, instant = false, slide = false } = 
 }
 
 /* ---------- panel docking ---------- */
-// The panel only scrolls its products while it sits exactly on screen ("docked"); otherwise the page scrolls,
-// carrying it into place. At either end of the list, scrolling hands back to the page.
+// The products scroll inside the panel once it is (nearly) on screen ("engaged"); before that the page scrolls,
+// carrying it up. When the visitor stops scrolling with the panel almost in place, it settles onto the screen
+// after a short pause, so there is time to read what is above it. No CSS scroll-snap: that pulled at other sections.
+const NEAR = 0.18;          // within 18% of the screen height counts as "almost in place"
+const SETTLE_DELAY = 700;   // ms of stillness before settling
 const panel = () => $('menuPanel');
 const topbar = () => document.getElementById('topbar');
+let settleTimer, touching = false, quietUntil = 0;
 
 function checkDock() {
   const p = panel();
   if (!p) return;
   const top = p.getBoundingClientRect().top;
-  const docked = Math.abs(top) <= 2;
-  if (docked !== p.classList.contains('docked')) p.classList.toggle('docked', docked);
-  // the whole screen belongs to the menu while docked
-  if (docked) { topbar().classList.add('away'); document.body.classList.add('header-away'); }
+  const engaged = Math.abs(top) <= innerHeight * NEAR;
+  if (engaged !== p.classList.contains('engaged')) p.classList.toggle('engaged', engaged);
+  // the whole screen belongs to the menu while it is docked
+  if (Math.abs(top) <= 2) { topbar().classList.add('away'); document.body.classList.add('header-away'); }
 }
+
+function scheduleSettle() {
+  clearTimeout(settleTimer);
+  if (touching) return;
+  settleTimer = setTimeout(() => {
+    if (touching || Date.now() < quietUntil) return;
+    const top = panel().getBoundingClientRect().top;
+    if (Math.abs(top) > 2 && Math.abs(top) <= innerHeight * NEAR) dock();
+  }, SETTLE_DELAY);
+}
+
+/** Pause the settle while the page is scrolled on purpose (nav links). */
+export const quiet = (ms = 1500) => { quietUntil = Date.now() + ms; clearTimeout(settleTimer); };
 
 /** Scroll the page so the menu panel fills the screen. */
 export function dock(instant = false) {
   const y = panel().getBoundingClientRect().top + scrollY;
+  quiet(1200);
   topbar().classList.add('away');
   document.body.classList.add('header-away');
   if (Math.abs(y - scrollY) <= 2) { checkDock(); return; }
@@ -235,7 +255,7 @@ function jumpTo(catId) {
   const sc = $('menuScroll');
   setActiveChip(catId);
   spyLock = Date.now() + 900;
-  if (!panel().classList.contains('docked')) dock();
+  if (Math.abs(panel().getBoundingClientRect().top) > 2) dock();
   const top = sc.scrollTop + sec.getBoundingClientRect().top - sc.getBoundingClientRect().top - 8;
   sc.scrollTo({ top, behavior: 'smooth' });
 }

@@ -36,23 +36,27 @@ function register() {
   });
 }
 
+/** Every [data-install] button (top bar + footer) installs the app, or explains how when the browser can't prompt. */
 function setupInstall() {
-  const btn = document.getElementById('installBtn');
+  const btns = [...document.querySelectorAll('[data-install]')];
   const standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
-  if (standalone || !btn) return;
+  if (standalone || !btns.length) return;
+  const show = (on) => btns.forEach((b) => { b.hidden = !on; });
   let deferred = null;
+  show(true);
 
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferred = e;
-    btn.hidden = false;
   });
-  window.addEventListener('appinstalled', () => { btn.hidden = true; sheet.toast('تمام! صار غولدن عشاشتك'); });
+  window.addEventListener('appinstalled', () => { show(false); sheet.toast('تمام! صار غولدن عشاشتك'); });
 
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  if (isIOS) btn.hidden = false;
+  const steps = isIOS
+    ? ['اكبس على زر المشاركة بأسفل Safari (المربع مع السهم لفوق).', 'نزال لتحت واختار <b>"إضافة إلى الشاشة الرئيسية"</b>.', 'اكبس <b>إضافة</b>، وصار المنيو عشاشتك، وبيفتح حتى لو النت ضعيف.']
+    : ['افتح قائمة المتصفح (النقاط التلاتة ⋮ فوق).', 'اختار <b>"تثبيت التطبيق"</b> أو <b>"إضافة إلى الشاشة الرئيسية"</b>.', 'أكّد، وصار المنيو عشاشتك، وبيفتح حتى لو النت ضعيف.'];
 
-  btn.addEventListener('click', async () => {
+  btns.forEach((btn) => btn.addEventListener('click', async () => {
     if (deferred) {
       deferred.prompt();
       await deferred.userChoice.catch(() => {});
@@ -61,12 +65,8 @@ function setupInstall() {
     }
     sheet.open({
       title: 'نزّل غولدن عموبايلك',
-      body: `<ol class="sheet-text" style="padding-inline-start:20px;display:grid;gap:10px;margin:0 0 8px">
-          <li>اكبس على زر المشاركة بأسفل Safari (المربع مع السهم لفوق).</li>
-          <li>نزال لتحت واختار <b>"إضافة إلى الشاشة الرئيسية"</b>.</li>
-          <li>اكبس <b>إضافة</b>، وصار المنيو عشاشتك، وبيفتح حتى لو النت ضعيف.</li>
-        </ol>`,
+      body: `<ol class="sheet-text" style="padding-inline-start:20px;display:grid;gap:10px;margin:0 0 8px">${steps.map((s) => `<li>${s}</li>`).join('')}</ol>`,
       foot: '<button class="btn btn-dark btn-block" type="button" data-close>تمام</button>',
     });
-  });
+  }));
 }

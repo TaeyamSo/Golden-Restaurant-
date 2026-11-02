@@ -34,9 +34,7 @@
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-/* proximity snap only affects the menu panel (the one snap point), so a page scroll ending near it settles it on screen */
-html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; scroll-snap-type: y proximity; }
-section[id] { scroll-margin-top: calc(var(--header-h) + 8px); }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 html.locked { overflow: hidden; }
 body {
   margin: 0;
@@ -135,6 +133,17 @@ p { margin: 0; }
 .wordmark-lg .wm-en { font-size: 26px; }
 .wordmark-lg .wm-ar { font-size: 24px; }
 .wordmark-lg .wm-rule { height: 24px; }
+.top-actions { display: flex; align-items: center; gap: 6px; }
+.nav-install {
+  display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border-radius: 999px;
+  border: 1px solid rgba(201, 162, 74, .55); color: var(--gold-hi); font: 600 13px/1 var(--font-body); white-space: nowrap;
+  transition: background-color .2s, border-color .2s;
+}
+.nav-install:hover { background: rgba(201, 162, 74, .12); border-color: var(--gold); }
+.nav-install svg { width: 16px; height: 16px; }
+/* narrow phones: the Arabic half of the wordmark makes room for the install button */
+@media (max-width: 399px) { .topbar .wm-rule, .topbar .wm-ar { display: none; } .topbar .wm-en { font-size: 17px; letter-spacing: .18em; } }
+@media (max-width: 339px) { .nav-install span { display: none; } .nav-install { width: 36px; padding: 0; justify-content: center; } }
 .topnav { display: none; gap: 28px; font-size: 15px; }
 .topnav a { text-decoration: none; color: var(--on-dark-2); transition: color .2s; }
 .topnav a:hover { color: var(--gold-hi); }
@@ -279,11 +288,11 @@ p { margin: 0; }
 
 /* ---------- menu ---------- */
 .menu { padding-bottom: 0; }
-/* the menu is one screen tall; products scroll inside .menu-scroll once the panel is docked at the top */
-.menu-panel { height: 100vh; height: 100svh; display: flex; flex-direction: column; scroll-snap-align: start; scroll-margin-top: 0; }
+/* the menu is one screen tall; products scroll inside .menu-scroll once the panel is (nearly) on screen */
+.menu-panel { height: 100vh; height: 100svh; display: flex; flex-direction: column; }
 .menu-nav { flex: none; position: relative; z-index: 2; background: var(--cream); border-bottom: 1px solid var(--line); box-shadow: 0 8px 18px -14px rgba(30, 20, 16, .35); }
 .menu-scroll { flex: 1; min-height: 0; overflow-x: hidden; overflow-y: hidden; overscroll-behavior-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 120px; }
-.menu-panel.docked .menu-scroll { overflow-y: auto; }
+.menu-panel.engaged .menu-scroll { overflow-y: auto; }
 .menu-slide { will-change: transform; }
 .store-tabs {
   position: relative; display: grid; grid-template-columns: repeat(3, 1fr);

@@ -105,7 +105,6 @@ function setupHeader() {
   update();
 }
 
-/* ---------- reveal on scroll ---------- */
 /* ---------- swipe rows: position dots ---------- */
 function rowDots(row, dots) {
   const cards = [...row.children];
@@ -120,6 +119,7 @@ function rowDots(row, dots) {
   cards.forEach((c) => io.observe(c));
 }
 
+/* ---------- reveal on scroll ---------- */
 function setupReveal() {
   const els = document.querySelectorAll('[data-reveal]');
   if (!('IntersectionObserver' in window)) { els.forEach((el) => el.classList.add('in')); return; }
@@ -139,6 +139,21 @@ function setupRouting() {
     const id = a.getAttribute('href').split('/')[1];
     if (id) menu.select(id, { scroll: true });
     else menu.dock();
+  });
+  // section links (top bar, scroll cue): land with the section's heading just below the top edge
+  document.addEventListener('click', (e) => {
+    const a = e.target.closest('a[href="#stores"], a[href="#reels"], a[href="#visit"], a[href="#top"]');
+    if (!a || e.defaultPrevented) return;
+    e.preventDefault();
+    menu.quiet();
+    const target = document.querySelector(a.getAttribute('href'));
+    if (a.getAttribute('href') === '#top') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
+    // layout position (offsetTop), not getBoundingClientRect: headings that haven't faded in yet are still shifted down
+    let y = 0;
+    for (let el = target.querySelector('.section-head') || target; el; el = el.offsetParent) y += el.offsetTop;
+    // scrolling down hides the header, scrolling up brings it back, so leave room for it only when going up
+    const gap = y > scrollY ? 20 : $('topbar').offsetHeight + 20;
+    window.scrollTo({ top: Math.max(0, y - gap), behavior: 'smooth' });
   });
   window.addEventListener('hashchange', () => {
     const id = hashStore();

@@ -165,10 +165,13 @@
       <a href="#menu">المنيو</a>
       <a href="#visit">وين نحنا</a>
     </nav>
-    <button class="icon-btn cart-btn" type="button" data-open-order aria-label="طلبك">
-      <svg><use href="#i-bag"/></svg>
-      <span class="badge" id="cartBadge" hidden>0</span>
-    </button>
+    <div class="top-actions">
+      <button class="nav-install" type="button" data-install hidden><svg><use href="#i-download"/></svg><span>نزّل التطبيق</span></button>
+      <button class="icon-btn cart-btn" type="button" data-open-order aria-label="طلبك">
+        <svg><use href="#i-bag"/></svg>
+        <span class="badge" id="cartBadge" hidden>0</span>
+      </button>
+    </div>
   </header>
 
   <div class="draft-chip" id="draftChip" hidden>
@@ -259,7 +262,7 @@
         <span class="wm-en">GOLDEN</span><span class="wm-rule" aria-hidden="true"></span><span class="wm-ar">غولدن</span>
       </a>
       <div class="footer-social" id="footerSocial"></div>
-      <button class="btn btn-line btn-sm" type="button" id="installBtn" hidden><svg><use href="#i-download"/></svg> نزّل التطبيق عموبايلك</button>
+      <button class="btn btn-line btn-sm" type="button" data-install hidden><svg><use href="#i-download"/></svg> نزّل التطبيق عموبايلك</button>
       <p class="footer-note">© 2026 Golden · السويداء — <a href="admin/">لوحة التحكم (تجريبي)</a></p>
       <p class="footer-credit">Made By Tayam</p>
     </div>
