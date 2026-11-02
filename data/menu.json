@@ -10,8 +10,8 @@
     "mock": ["instagram"]
   },
   "reels": [
-    { "id": "reel-1", "src": "assets/video/reel-1.mp4", "poster": "assets/video/reel-1-poster.webp", "title": "جولة بمحلات غولدن", "store": "bakery", "size": "3.5 MB" },
-    { "id": "reel-2", "src": "assets/video/reel-2.mp4", "poster": "assets/video/reel-2-poster.webp", "title": "من مطبخ Golden Snack", "store": "snack", "size": "5.5 MB" }
+    { "id": "reel-1", "src": "assets/video/reel-1.mp4", "poster": "assets/video/reel-1-poster.webp", "preview": "assets/video/reel-1-preview.mp4", "title": "جولة بمحلات غولدن", "store": "bakery", "size": "3.5 MB" },
+    { "id": "reel-2", "src": "assets/video/reel-2.mp4", "poster": "assets/video/reel-2-poster.webp", "preview": "assets/video/reel-2-preview.mp4", "title": "من مطبخ Golden Snack", "store": "snack", "size": "5.5 MB" }
   ],
   "stores": [
     {

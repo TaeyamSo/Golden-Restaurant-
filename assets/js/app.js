@@ -42,7 +42,19 @@ async function main() {
   pwa.init();
 
   // deep links jump once the loading screen lifts: by then fonts and the hero have their final sizes
-  if (hashStore()) whenReady(() => menu.select(hashStore(), { scroll: true, instant: true }));
+  const linked = hashStore();
+  if (linked) {
+    clearHash();
+    whenReady(() => menu.select(linked, { scroll: true, instant: true }));
+  }
+}
+
+/**
+ * A #menu/<store> link is used once, then removed from the address bar, so refreshing the page
+ * restores where the visitor was instead of jumping back to the menu.
+ */
+function clearHash() {
+  history.replaceState(history.state, '', location.pathname + location.search);
 }
 
 /* ---------- stores (story cards) ---------- */
@@ -169,7 +181,7 @@ function setupRouting() {
   });
   window.addEventListener('hashchange', () => {
     const id = hashStore();
-    if (id) menu.select(id, { scroll: true });
+    if (id) { clearHash(); menu.select(id, { scroll: true }); }
   });
 }
 

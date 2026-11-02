@@ -2,10 +2,12 @@
 import * as cart from './cart.js';
 import { requestAdd } from './order.js';
 import { findStore, imgTag, mockTag, minPrice, monogram } from './data.js';
-import { esc, money, telHref, hoursLabel, statusHTML } from './format.js';
+import { esc, money, telHref, hoursLabel, statusHTML, itemsLabel } from './format.js';
 
+const PAGE = 10; // items shown per store before "حمّل أكتر"
 let data;
 let storeId;
+let shown = PAGE;
 const $ = (id) => document.getElementById(id);
 
 export function init(d, initialStore) {
@@ -23,6 +25,7 @@ export function init(d, initialStore) {
     if (c) jumpTo(c.dataset.cat);
   });
   $('menuList').addEventListener('click', onListClick);
+  $('menuMore').addEventListener('click', () => showMore(shown + PAGE));
   $('menuList').addEventListener('load', (e) => e.target.classList?.remove('lazy'), true);
   cart.subscribe(updateActions);
   window.addEventListener('scroll', onScroll, { passive: true });
@@ -41,8 +44,8 @@ export function select(id, { scroll = false, instant = false, slide = false } = 
   const dir = ids.indexOf(id) > ids.indexOf(storeId) ? 1 : -1;
   const changed = id !== storeId;
   storeId = id;
-  history.replaceState(history.state, '', `#menu/${id}`);
   if (changed) {
+    shown = PAGE;
     if (slide) slideTo(dir);
     else render();
   }
@@ -171,6 +174,38 @@ function render() {
     </section>`).join('');
 
   $('menuList').querySelectorAll('img.lazy').forEach((img) => { if (img.complete) img.classList.remove('lazy'); });
+  applyLimit();
+}
+
+/* ---------- "حمّل أكتر": first PAGE items, then PAGE more per tap ---------- */
+function applyLimit() {
+  let n = 0;
+  const revealed = [];
+  $('menuList').querySelectorAll('.cat').forEach((sec) => {
+    let visible = 0;
+    sec.querySelectorAll('.item').forEach((it) => {
+      const show = n < shown;
+      if (show && it.hidden) revealed.push(it);
+      it.hidden = !show;
+      if (show) visible++;
+      n++;
+    });
+    sec.hidden = visible === 0;
+  });
+  const left = n - Math.min(n, shown);
+  $('menuMore').hidden = left <= 0;
+  if (left > 0) $('menuMore').firstElementChild.innerHTML = `حمّل أكتر <span class="more-count">· ${itemsLabel(left)} كمان</span>`;
+  return revealed;
+}
+
+function showMore(limit) {
+  shown = limit;
+  applyLimit().forEach((it, i) => {
+    it.classList.remove('just-in');
+    void it.offsetWidth;
+    it.style.animationDelay = `${Math.min(i, 8) * 40}ms`;
+    it.classList.add('just-in');
+  });
 }
 
 function itemHTML(store, it) {
@@ -240,6 +275,8 @@ let spyLock = 0;
 function jumpTo(catId) {
   const sec = document.getElementById(`cat-${catId}`);
   if (!sec) return;
+  // a category past the "حمّل أكتر" cut: show everything first, then jump to it
+  if (sec.hidden || sec.querySelector('.item[hidden]')) showMore(Infinity);
   const y = sec.getBoundingClientRect().top + scrollY;
   const goingDown = y > scrollY;
   // going down hides the header (tabs pin to the very top); going up brings it back above the tabs
@@ -273,7 +310,7 @@ function onScroll() {
     if (Date.now() < spyLock) return;
     const navBottom = $('menuNav').getBoundingClientRect().bottom + 24;
     let currentCat = null;
-    $('menuList').querySelectorAll('.cat').forEach((sec) => {
+    $('menuList').querySelectorAll('.cat:not([hidden])').forEach((sec) => {
       if (sec.getBoundingClientRect().top <= navBottom) currentCat = sec.dataset.catId;
     });
     const first = $('catChips').querySelector('.chip');

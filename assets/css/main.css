@@ -169,7 +169,9 @@ p { margin: 0; }
   position: relative; isolation: isolate; overflow: hidden;
   min-height: 100vh; min-height: 100svh;
   display: flex; align-items: flex-end;
-  padding: calc(var(--header-h) + 40px) 0 44px;
+  /* full-height hero, but the text keeps its old spot: 8% of the screen + 44px above the bottom edge */
+  padding: calc(var(--header-h) + 40px) 0 calc(44px + 8vh);
+  padding-bottom: calc(44px + 8svh);
 }
 .hero-img {
   position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; z-index: -2;
@@ -257,12 +259,22 @@ p { margin: 0; }
   box-shadow: 0 24px 50px -28px rgba(0, 0, 0, .9);
 }
 .reel video { width: 100%; height: 100%; object-fit: cover; background: var(--cocoa); }
+/* silent preview loop over the poster until the visitor plays the real video */
+.reel .reel-preview { position: absolute; inset: 0; opacity: 0; transition: opacity .6s ease; pointer-events: none; background: transparent; }
+.reel.previewing .reel-preview { opacity: 1; }
+.reel.started .reel-preview { opacity: 0; }
 .reel-play {
   position: absolute; inset: 0; display: grid; place-items: center; align-content: center; gap: 10px;
   color: var(--on-dark); background: linear-gradient(to top, rgba(22, 14, 10, .85), transparent 45%);
   transition: opacity .3s;
 }
-.reel-play .disc { width: 66px; height: 66px; border-radius: 50%; display: grid; place-items: center; background: rgba(30, 20, 16, .55); border: 1.5px solid rgba(226, 190, 106, .8); transition: transform .3s var(--ease); }
+.reel-play .disc { position: relative; width: 66px; height: 66px; border-radius: 50%; display: grid; place-items: center; background: rgba(30, 20, 16, .55); border: 1.5px solid rgba(226, 190, 106, .8); transition: transform .3s var(--ease); }
+/* a soft ring keeps rippling out of the play button until the video is started */
+.reel:not(.started) .reel-play .disc::after {
+  content: ""; position: absolute; inset: -2px; border-radius: 50%; border: 1.5px solid rgba(226, 190, 106, .7);
+  animation: reel-ring 2.2s ease-out infinite;
+}
+@keyframes reel-ring { from { transform: scale(1); opacity: .9; } to { transform: scale(1.7); opacity: 0; } }
 .reel-play .disc svg { width: 26px; height: 26px; color: var(--gold-hi); margin-inline-start: 3px; }
 .reel-play:active .disc { transform: scale(.92); }
 .reel-size { font-size: 12px; color: var(--on-dark-2); direction: ltr; }
@@ -299,6 +311,10 @@ p { margin: 0; }
 }
 .header-away .menu-nav { top: 0; }
 .menu-slide { will-change: transform; }
+.menu-more { display: flex; justify-content: center; padding: 28px 0 8px; }
+.menu-more .btn { min-width: 220px; }
+.more-count { font-weight: 400; opacity: .75; }
+.item.just-in { animation: fade .5s var(--ease) both; }
 .store-tabs {
   position: relative; display: grid; grid-template-columns: repeat(3, 1fr);
   max-width: 1180px; margin-inline: auto; padding: 8px var(--gutter) 0;
@@ -561,7 +577,7 @@ p { margin: 0; }
 }
 @media (min-width: 980px) {
   .topnav { display: flex; }
-  .hero { min-height: 100vh; align-items: center; }
+  .hero { min-height: 100vh; align-items: center; padding-bottom: 44px; }
   .hero-content { max-width: 620px; margin-inline-start: max(var(--gutter), calc((100vw - 1180px) / 2 + var(--gutter))); margin-inline-end: 0; }
   .hero-shade { background: linear-gradient(to left, rgba(30, 20, 16, .94) 10%, rgba(30, 20, 16, .55) 50%, rgba(30, 20, 16, .1) 80%), linear-gradient(to top, var(--espresso), transparent 30%), var(--grain); }
   .stores-row { justify-content: center; overflow: visible; }

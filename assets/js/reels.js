@@ -1,5 +1,6 @@
 // Reels carousel: swipe between videos, tap to play, last card links out to the socials.
-// Videos use preload="none" so nothing downloads until the visitor taps play.
+// Full videos use preload="none" so they only download on a tap. Before that, a card on screen plays a tiny
+// silent 3-second loop (≈160 KB) so it reads as a video; skipped when saving data or with reduced motion.
 import { mockTag } from './data.js';
 import { esc } from './format.js';
 
@@ -10,6 +11,7 @@ export function init(data) {
   row.innerHTML = data.reels.map((r, i) => `
     <div class="reel" data-i="${i}">
       <video playsinline preload="none" poster="${esc(r.poster)}" src="${esc(r.src)}" aria-label="${esc(r.title)}"></video>
+      ${r.preview ? `<video class="reel-preview" muted playsinline loop preload="none" data-src="${esc(r.preview)}" aria-hidden="true" tabindex="-1"></video>` : ''}
       <button class="reel-play" type="button" aria-label="شغّل: ${esc(r.title)}">
         <span class="disc"><svg><use href="#i-play"/></svg></span>
         ${r.size ? `<span class="reel-size">${esc(r.size)}</span>` : ''}
@@ -30,7 +32,7 @@ export function init(data) {
   // the loading screen buffers the start of reel 1 in its own element; swap that element in so playback
   // starts at once (it may still be waiting for its src if the page opened before the buffering began)
   const G = window.__golden;
-  const first = row.querySelector('.reel video');
+  const first = row.querySelector('.reel video:not(.reel-preview)');
   const abs = (u) => new URL(u, document.baseURI).href;
   if (G?.reel && first && abs(G.reelSrc) === abs(first.getAttribute('src'))) {
     G.reel.poster = first.getAttribute('poster');
@@ -42,14 +44,15 @@ export function init(data) {
 
   const cards = [...row.children];
   dots.innerHTML = cards.map(() => '<i></i>').join('');
-  const videos = [...row.querySelectorAll('video')];
+  const videos = [...row.querySelectorAll('video:not(.reel-preview)')];
+  const mainOf = (card) => card.querySelector('video:not(.reel-preview)');
 
   const pauseOthers = (keep) => videos.forEach((v) => { if (v !== keep && !v.paused) v.pause(); });
 
   row.addEventListener('click', (e) => {
     const card = e.target.closest('.reel');
     if (!card) return;
-    const v = card.querySelector('video');
+    const v = mainOf(card);
     const soundBtn = e.target.closest('.reel-sound');
     if (soundBtn) {
       v.muted = !v.muted;
@@ -67,9 +70,11 @@ export function init(data) {
   videos.forEach((v) => {
     const card = v.closest('.reel');
     const bar = card.querySelector('.reel-bar i');
-    v.addEventListener('play', () => card.classList.add('playing'));
+    const preview = card.querySelector('.reel-preview');
+    // once the real video has started, the preview loop steps aside for good (until the video ends)
+    v.addEventListener('play', () => { card.classList.add('playing', 'started'); preview?.pause(); });
     v.addEventListener('pause', () => card.classList.remove('playing'));
-    v.addEventListener('ended', () => { card.classList.remove('playing'); bar.style.width = '0'; v.currentTime = 0; });
+    v.addEventListener('ended', () => { card.classList.remove('playing', 'started'); bar.style.width = '0'; v.currentTime = 0; });
     v.addEventListener('timeupdate', () => { if (v.duration) bar.style.width = `${(v.currentTime / v.duration) * 100}%`; });
   });
 
@@ -81,13 +86,28 @@ export function init(data) {
         if (en.isIntersecting && en.intersectionRatio > 0.6) {
           dots.querySelectorAll('i').forEach((d, j) => d.classList.toggle('on', j === i));
         }
-        if (!en.isIntersecting || en.intersectionRatio < 0.35) en.target.querySelector('video')?.pause();
+        if (!en.isIntersecting || en.intersectionRatio < 0.35) mainOf(en.target)?.pause();
       });
     }, { root: row, threshold: [0, 0.35, 0.6, 1] });
     cards.forEach((c) => io.observe(c));
 
     // also pause when the whole section leaves the screen
     new IntersectionObserver(([en]) => { if (!en.isIntersecting) pauseOthers(null); }).observe(row);
+
+    // preview loops: play while the card is on screen (sideways and vertically), pause otherwise
+    const c = navigator.connection || {};
+    const allowPreview = !c.saveData && !/2g/.test(c.effectiveType || '') && !matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (allowPreview) {
+      const pio = new IntersectionObserver((entries) => entries.forEach((en) => {
+        const p = en.target.querySelector('.reel-preview');
+        if (!p) return;
+        if (en.isIntersecting && en.intersectionRatio >= 0.5 && !en.target.classList.contains('started')) {
+          if (!p.getAttribute('src')) p.src = p.dataset.src;
+          p.play().then(() => en.target.classList.add('previewing')).catch(() => {});
+        } else p.pause();
+      }), { threshold: [0, 0.5] });
+      row.querySelectorAll('.reel').forEach((card) => pio.observe(card));
+    }
   }
   dots.firstElementChild?.classList.add('on');
 }

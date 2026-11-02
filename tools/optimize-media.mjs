@@ -114,6 +114,8 @@ const reels = [
   { input: REEL_1, name: 'reel-1', scale: 'scale=540:-2', poster: 13 },
   { input: REEL_2, name: 'reel-2', scale: 'scale=360:-2', poster: 4 },
 ];
+// silent 3-second loops from the poster's moment, played in the card before the visitor taps play
+const PREVIEW_SECONDS = 3;
 for (const r of reels) {
   const mp4 = out('video', `${r.name}.mp4`);
   if (!existsSync(mp4) || process.argv.includes('--force-video')) {
@@ -124,7 +126,10 @@ for (const r of reels) {
   run(['-ss', String(r.poster), '-i', r.input, '-frames:v', '1', png]);
   const poster = out('video', `${r.name}-poster.webp`);
   await sharp(png).resize({ width: 540, withoutEnlargement: true }).webp({ quality: 60 }).toFile(poster);
-  console.log(`vid  ${r.name.padEnd(26)} ${kb(mp4)}  poster ${kb(poster)}`);
+  const preview = out('video', `${r.name}-preview.mp4`);
+  run(['-ss', String(r.poster), '-t', String(PREVIEW_SECONDS), '-i', r.input, '-an', '-vf', 'scale=360:-2',
+    '-c:v', 'libx264', '-preset', 'slow', '-crf', '31', '-profile:v', 'main', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', preview]);
+  console.log(`vid  ${r.name.padEnd(26)} ${kb(mp4)}  poster ${kb(poster)}  preview ${kb(preview)}`);
 }
 rmSync(tmp, { recursive: true, force: true });
 
