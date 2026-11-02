@@ -25,19 +25,15 @@ export function init(d, initialStore) {
   $('menuList').addEventListener('click', onListClick);
   $('menuList').addEventListener('load', (e) => e.target.classList?.remove('lazy'), true);
   cart.subscribe(updateActions);
-  $('menuScroll').addEventListener('scroll', onScroll, { passive: true });
-  window.addEventListener('scroll', () => { checkDock(); scheduleSettle(); }, { passive: true });
-  window.addEventListener('resize', () => { moveInk(false); checkDock(); }, { passive: true });
-  addEventListener('touchstart', () => { touching = true; clearTimeout(settleTimer); }, { passive: true });
-  addEventListener('touchend', () => { touching = false; scheduleSettle(); }, { passive: true });
-  checkDock();
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', () => moveInk(false), { passive: true });
 }
 
 export const current = () => storeId;
 
 /**
- * Switch store. Tabs slide the list sideways (the page itself doesn't move); store cards, the hero button and
- * #menu/<id> links pass { scroll: true } to bring the menu panel onto the screen.
+ * Switch store. Tabs slide the list sideways (no visible page scroll); store cards, the hero button and
+ * #menu/<id> links pass { scroll: true } to bring the start of the menu under the pinned tabs.
  */
 export function select(id, { scroll = false, instant = false, slide = false } = {}) {
   if (!findStore(data, id)) return;
@@ -48,59 +44,45 @@ export function select(id, { scroll = false, instant = false, slide = false } = 
   history.replaceState(history.state, '', `#menu/${id}`);
   if (changed) {
     if (slide) slideTo(dir);
-    else { render(); $('menuScroll').scrollTop = 0; }
+    else render();
   }
   updateTabs();
-  if (scroll) dock(instant);
+  if (scroll) scrollToMenu(instant);
 }
 
-/* ---------- panel docking ---------- */
-// The products scroll inside the panel once it is (nearly) on screen ("engaged"); before that the page scrolls,
-// carrying it up. When the visitor stops scrolling with the panel almost in place, it settles onto the screen
-// after a short pause, so there is time to read what is above it. No CSS scroll-snap: that pulled at other sections.
-const NEAR = 0.18;          // within 18% of the screen height counts as "almost in place"
-const SETTLE_DELAY = 700;   // ms of stillness before settling
-const panel = () => $('menuPanel');
+/* ---------- page position ---------- */
 const topbar = () => document.getElementById('topbar');
-let settleTimer, touching = false, quietUntil = 0;
+const headerH = () => topbar().offsetHeight;
 
-function checkDock() {
-  const p = panel();
-  if (!p) return;
-  const top = p.getBoundingClientRect().top;
-  const engaged = Math.abs(top) <= innerHeight * NEAR;
-  if (engaged !== p.classList.contains('engaged')) p.classList.toggle('engaged', engaged);
-  // the whole screen belongs to the menu while it is docked
-  if (Math.abs(top) <= 2) { topbar().classList.add('away'); document.body.classList.add('header-away'); }
-}
-
-function scheduleSettle() {
-  clearTimeout(settleTimer);
-  if (touching) return;
-  settleTimer = setTimeout(() => {
-    if (touching || Date.now() < quietUntil) return;
-    const top = panel().getBoundingClientRect().top;
-    if (Math.abs(top) > 2 && Math.abs(top) <= innerHeight * NEAR) dock();
-  }, SETTLE_DELAY);
-}
-
-/** Pause the settle while the page is scrolled on purpose (nav links). */
-export const quiet = (ms = 1500) => { quietUntil = Date.now() + ms; clearTimeout(settleTimer); };
-
-/** Scroll the page so the menu panel fills the screen. */
-export function dock(instant = false) {
-  const y = panel().getBoundingClientRect().top + scrollY;
-  quiet(1200);
+function hideHeader(ms = 0) {
   topbar().classList.add('away');
   document.body.classList.add('header-away');
-  if (Math.abs(y - scrollY) <= 2) { checkDock(); return; }
-  if (!instant) { window.scrollTo({ top: y, behavior: 'smooth' }); return; }
-  // html has scroll-behavior: smooth, so switch it off for the initial deep-link jump
+  // keep app.js's scroll handler from bringing the header back after our own upward jump
+  if (ms) {
+    window.__golden = window.__golden || {};
+    window.__golden.ignoreHeaderUntil = Date.now() + ms;
+  }
+}
+
+function jumpPage(y) {
+  // html has scroll-behavior: smooth, so switch it off for jumps that must not be seen
   const root = document.documentElement;
   root.style.scrollBehavior = 'auto';
   window.scrollTo(0, y);
   root.style.scrollBehavior = '';
-  checkDock();
+}
+
+/** Page offset of the store strip when it sits just under the pinned tabs (header hidden). */
+const menuStartY = () => $('storeStrip').getBoundingClientRect().top + scrollY - $('menuNav').offsetHeight - 4;
+
+/** Bring the start of the menu (store strip) just under the pinned tabs. */
+export function scrollToMenu(instant = false) {
+  const y = menuStartY();
+  if (Math.abs(y - scrollY) <= 8) return;
+  const goingDown = y > scrollY;
+  if (instant) { hideHeader(400); jumpPage(y); return; }
+  // going down hides the header; going up brings it back, so leave room for it
+  window.scrollTo({ top: goingDown ? y : y - headerH(), behavior: 'smooth' });
 }
 
 /* ---------- sideways slide between stores ---------- */
@@ -110,13 +92,19 @@ function slideTo(dir) {
   const el = $('menuSlide');
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   clearTimeout(slideTimer);
-  if (reduce) { render(); $('menuScroll').scrollTop = 0; return; }
+  // if the visitor is deep in the list, the new store starts at its top: jump there while the list is hidden.
+  // The tabs stay pinned during the jump, so no scrolling is seen.
+  const resetIfDeep = () => {
+    const y = menuStartY();
+    if (scrollY > y + 2) { hideHeader(700); jumpPage(y); }
+  };
+  if (reduce) { render(); resetIfDeep(); return; }
   el.style.transition = 'transform .2s cubic-bezier(.55, 0, 1, .45), opacity .2s ease-in';
   el.style.transform = `translateX(${dir * 28}%)`;
   el.style.opacity = '0';
   slideTimer = setTimeout(() => {
     render();
-    $('menuScroll').scrollTop = 0; // reset while the list is invisible
+    resetIfDeep();
     el.style.transition = 'none';
     el.style.transform = `translateX(${-dir * 28}%)`;
     void el.offsetWidth;
@@ -252,12 +240,13 @@ let spyLock = 0;
 function jumpTo(catId) {
   const sec = document.getElementById(`cat-${catId}`);
   if (!sec) return;
-  const sc = $('menuScroll');
+  const y = sec.getBoundingClientRect().top + scrollY;
+  const goingDown = y > scrollY;
+  // going down hides the header (tabs pin to the very top); going up brings it back above the tabs
+  const offset = $('menuNav').offsetHeight + (goingDown ? 0 : headerH()) + 6;
   setActiveChip(catId);
   spyLock = Date.now() + 900;
-  if (Math.abs(panel().getBoundingClientRect().top) > 2) dock();
-  const top = sc.scrollTop + sec.getBoundingClientRect().top - sc.getBoundingClientRect().top - 8;
-  sc.scrollTo({ top, behavior: 'smooth' });
+  window.scrollTo({ top: y - offset, behavior: 'smooth' });
 }
 
 function setActiveChip(catId) {

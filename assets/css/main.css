@@ -287,12 +287,17 @@ p { margin: 0; }
 .dots i.on { width: 22px; background: var(--gold); }
 
 /* ---------- menu ---------- */
-.menu { padding-bottom: 0; }
-/* the menu is one screen tall; products scroll inside .menu-scroll once the panel is (nearly) on screen */
-.menu-panel { height: 100vh; height: 100svh; display: flex; flex-direction: column; }
-.menu-nav { flex: none; position: relative; z-index: 2; background: var(--cream); border-bottom: 1px solid var(--line); box-shadow: 0 8px 18px -14px rgba(30, 20, 16, .35); }
-.menu-scroll { flex: 1; min-height: 0; overflow-x: hidden; overflow-y: hidden; overscroll-behavior-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 120px; }
-.menu-panel.engaged .menu-scroll { overflow-y: auto; }
+.menu { padding-bottom: 120px; overflow-x: clip; }
+/* store tabs + category chips stay pinned under the header while scrolling through the menu */
+.menu-nav {
+  position: -webkit-sticky; position: sticky; top: var(--header-h); z-index: 20;
+  background: rgba(245, 235, 221, .97); border-bottom: 1px solid var(--line);
+  transition: top .4s var(--ease);
+}
+@supports ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .menu-nav { background: rgba(245, 235, 221, .88); -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+}
+.header-away .menu-nav { top: 0; }
 .menu-slide { will-change: transform; }
 .store-tabs {
   position: relative; display: grid; grid-template-columns: repeat(3, 1fr);
@@ -568,6 +573,7 @@ p { margin: 0; }
   .item { flex-direction: column-reverse; gap: 12px; border-bottom: 0; }
   .item-media { width: 100%; aspect-ratio: 4 / 3; }
   .stores .dots, .visit .dots { display: none; }
+  .menu { padding-bottom: 140px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

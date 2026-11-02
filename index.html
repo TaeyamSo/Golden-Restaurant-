@@ -92,7 +92,12 @@
       });
       var fonts = css.then(function () {
         if (!d.fonts || !d.fonts.load) return;
-        return Promise.all([d.fonts.load('600 40px "Reem Kufi"', 'غولدن'), d.fonts.load('16px "IBM Plex Sans Arabic"', 'منيو')]).catch(function () {});
+        // every weight the page uses, so nothing reflows (and shifts the scroll position) after the loader lifts
+        return Promise.all([
+          d.fonts.load('600 40px "Reem Kufi"', 'غولدن'), d.fonts.load('600 40px "Reem Kufi"', 'Golden'),
+          d.fonts.load('16px "IBM Plex Sans Arabic"', 'منيو'), d.fonts.load('600 16px "IBM Plex Sans Arabic"', 'منيو'),
+          d.fonts.load('16px "IBM Plex Sans Arabic"', 'Golden'), d.fonts.load('600 16px "IBM Plex Sans Arabic"', 'Golden'),
+        ]).catch(function () {});
       });
       // buffer the start of reel 1 (reels.js reuses this same element), unless the visitor is saving data.
       // It starts only after the styles and hero photo are in, so it never slows the page itself.
@@ -229,18 +234,13 @@
         <h2 id="menuTitle">شو جاي عبالك اليوم؟</h2>
         <p class="lead">اختار المحل، زيد يلي بدك ياه، ولما تخلص اتصل واطلب. كل محل إلو طلب لحال.</p>
       </div>
-      <!-- one screen tall: tabs + chips stay on top, the products scroll inside (see menu.js docking) -->
-      <div class="menu-panel" id="menuPanel">
-        <div class="menu-nav" id="menuNav">
-          <div class="store-tabs" id="storeTabs" role="tablist" aria-label="المحلات"></div>
-          <div class="cat-chips" id="catChips" aria-label="الأقسام"></div>
-        </div>
-        <div class="menu-scroll" id="menuScroll">
-          <div class="wrap menu-slide" id="menuSlide">
-            <div class="store-strip" id="storeStrip"></div>
-            <div class="menu-list" id="menuList" aria-live="polite"></div>
-          </div>
-        </div>
+      <div class="menu-nav" id="menuNav">
+        <div class="store-tabs" id="storeTabs" role="tablist" aria-label="المحلات"></div>
+        <div class="cat-chips" id="catChips" aria-label="الأقسام"></div>
+      </div>
+      <div class="wrap menu-slide" id="menuSlide">
+        <div class="store-strip" id="storeStrip"></div>
+        <div class="menu-list" id="menuList" aria-live="polite"></div>
       </div>
     </section>
 

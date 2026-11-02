@@ -41,7 +41,8 @@ async function main() {
   setupRouting();
   pwa.init();
 
-  if (hashStore()) requestAnimationFrame(() => menu.select(hashStore(), { scroll: true, instant: true }));
+  // deep links jump once the loading screen lifts: by then fonts and the hero have their final sizes
+  if (hashStore()) whenReady(() => menu.select(hashStore(), { scroll: true, instant: true }));
 }
 
 /* ---------- stores (story cards) ---------- */
@@ -95,7 +96,9 @@ function setupHeader() {
     const y = scrollY;
     bar.classList.toggle('solid', y > hero.offsetHeight - bar.offsetHeight - 10);
     const away = y > lastY + 4 && y > hero.offsetHeight * 0.8 && !document.documentElement.classList.contains('locked');
-    const back = y < lastY - 4 || y < 80;
+    // menu.js briefly sets ignoreHeaderUntil after its own hidden jumps (store switch), so the header stays put
+    const held = Date.now() < (window.__golden?.ignoreHeaderUntil || 0);
+    const back = !held && (y < lastY - 4 || y < 80);
     if (away) bar.classList.add('away');
     else if (back) bar.classList.remove('away');
     document.body.classList.toggle('header-away', bar.classList.contains('away'));
@@ -103,6 +106,16 @@ function setupHeader() {
   };
   window.addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
   update();
+}
+
+/** Run fn once the loading screen has finished (html.ready), right away if it already has. */
+function whenReady(fn) {
+  const h = document.documentElement;
+  if (h.classList.contains('ready') || !h.classList.contains('js')) { fn(); return; }
+  const mo = new MutationObserver(() => {
+    if (h.classList.contains('ready')) { mo.disconnect(); fn(); }
+  });
+  mo.observe(h, { attributes: true, attributeFilter: ['class'] });
 }
 
 /* ---------- swipe rows: position dots ---------- */
@@ -131,21 +144,20 @@ function setupReveal() {
 
 /* ---------- #menu/<store> links (store cards, PWA shortcuts, shared links) ---------- */
 function setupRouting() {
-  // handled in JS (not as a hash jump) so tapping the same store twice still works, and the menu lands docked
+  // handled in JS (not as a hash jump) so tapping the same store twice still works, and the pinned tabs are allowed for
   document.addEventListener('click', (e) => {
     const a = e.target.closest('a[href^="#menu/"], a[href="#menu"]');
     if (!a || e.defaultPrevented) return;
     e.preventDefault();
     const id = a.getAttribute('href').split('/')[1];
     if (id) menu.select(id, { scroll: true });
-    else menu.dock();
+    else menu.scrollToMenu();
   });
   // section links (top bar, scroll cue): land with the section's heading just below the top edge
   document.addEventListener('click', (e) => {
     const a = e.target.closest('a[href="#stores"], a[href="#reels"], a[href="#visit"], a[href="#top"]');
     if (!a || e.defaultPrevented) return;
     e.preventDefault();
-    menu.quiet();
     const target = document.querySelector(a.getAttribute('href'));
     if (a.getAttribute('href') === '#top') { window.scrollTo({ top: 0, behavior: 'smooth' }); return; }
     // layout position (offsetTop), not getBoundingClientRect: headings that haven't faded in yet are still shifted down
