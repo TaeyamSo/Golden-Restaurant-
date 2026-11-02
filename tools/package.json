@@ -1,0 +1,16 @@
+{
+  "name": "golden-tools",
+  "private": true,
+  "type": "module",
+  "description": "Dev-only tooling for the Golden site: media optimization and a local static server. Not needed at runtime.",
+  "scripts": {
+    "media": "node optimize-media.mjs",
+    "serve": "node serve.mjs"
+  },
+  "devDependencies": {
+    "ffmpeg-static": "^5.2.0",
+    "harfbuzzjs": "^1.6.4",
+    "puppeteer-core": "^23.11.1",
+    "sharp": "^0.33.5"
+  }
+}

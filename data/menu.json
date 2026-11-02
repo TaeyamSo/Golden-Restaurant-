@@ -1,0 +1,171 @@
+{
+  "version": 1,
+  "currency": "ل.س",
+  "brand": {
+    "nameEn": "GOLDEN",
+    "nameAr": "غولدن",
+    "city": "السويداء",
+    "closing": "كل الحب، عائلة غولدن",
+    "instagram": "https://www.instagram.com/",
+    "mock": ["instagram"]
+  },
+  "reels": [
+    { "id": "reel-1", "src": "assets/video/reel-1.mp4", "poster": "assets/video/reel-1-poster.webp", "title": "جولة بمحلات غولدن", "store": "bakery", "size": "3.5 MB" },
+    { "id": "reel-2", "src": "assets/video/reel-2.mp4", "poster": "assets/video/reel-2-poster.webp", "title": "من مطبخ Golden Snack", "store": "snack", "size": "5.5 MB" }
+  ],
+  "stores": [
+    {
+      "id": "bakery",
+      "nameEn": "Golden Bakery",
+      "nameAr": "غولدن بيكري",
+      "monogram": "GB",
+      "kind": "مناقيش · فطاير · بيتزا",
+      "tagline": "جمعنا خبرة 10 سنين بالغربة وطلّعناها مناقيش وبيتزا من الفرن لإيدك.",
+      "story": "من هون بلّشت الحكاية. خبرة عشر سنين بالغربة رجعت عالسويدا بفرن، وصار الصبح عنا ريحة زعتر وجبنة.",
+      "cover": "bakery-zaatar-cheese",
+      "storefront": "bakery-storefront",
+      "phone": "0938831703",
+      "address": "السويداء — وسط البلد",
+      "mapsQuery": "Golden Bakery السويداء",
+      "hours": { "open": "07:00", "close": "23:00" },
+      "facebook": "https://www.facebook.com/share/1dfujQ7EEf/",
+      "instagram": "https://www.instagram.com/",
+      "mock": ["address", "hours", "instagram"],
+      "categories": [
+        {
+          "id": "manakish",
+          "name": "مناقيش",
+          "items": [
+            { "id": "zaatar", "name": "زعتر", "desc": "زعتر بلدي وزيت زيتون، مع خسّ وبندورة عالجنب.", "img": "bakery-zaatar", "price": 100, "available": true, "mock": ["price", "desc"] },
+            { "id": "cheese", "name": "جبنة", "desc": "جبنة عكاوي وموزاريلا ذايبة لآخر لقمة.", "img": "bakery-cheese", "price": 160, "available": true, "mock": ["price", "desc"] },
+            { "id": "zaatar-cheese", "name": "زعتر وجبنة", "desc": "الكلاسيكية يلي ما بتغلط: نص زعتر ونص جبنة بتمطّ.", "img": "bakery-zaatar-cheese", "price": 170, "available": true, "mock": ["price", "desc"] },
+            { "id": "muhammara-cheese", "name": "محمّرة بجبنة", "desc": "محمّرة حرّة شوي ومغطّاية جبنة.", "img": "bakery-muhammara-cheese", "price": 180, "available": true, "mock": ["price", "desc"] },
+            { "id": "lahm-ajeen-cheese", "name": "لحم بعجين بجبنة", "desc": "لحمة مفرومة متبّلة عالعجين مع جبنة فوقها.", "img": "bakery-lahm-ajeen-cheese", "price": 250, "available": true, "mock": ["price", "desc"] },
+            { "id": "sujuk-cheese", "name": "سجق بجبنة", "desc": "سجق مفروم مع موزاريلا، مقطّعة أربع قطع.", "img": "bakery-sujuk-cheese", "price": 260, "available": true, "mock": ["price", "desc"] },
+            { "id": "meat-cheese", "name": "لحمة وجبنة", "desc": "عجينة مدوّرة، لحمة وجبنة مشويين سوا.", "img": "bakery-meat-cheese", "price": 270, "available": true, "mock": ["price", "desc"] },
+            { "id": "mixed-tray", "name": "صدر مناقيش مشكّل", "desc": "10 قطع مشكّلة للعزايم والسهرات.", "img": "bakery-oven-manakish", "price": 1500, "available": true, "mock": ["name", "price", "desc"] }
+          ]
+        },
+        {
+          "id": "pizza",
+          "name": "بيتزا",
+          "items": [
+            { "id": "pizza-cheese", "name": "بيتزا أجبان", "desc": "موزاريلا وشيدر على صلصة بندورة.", "img": "bakery-pizza-cheese", "sizes": [{ "id": "s", "name": "صغير", "price": 300 }, { "id": "m", "name": "وسط", "price": 400 }, { "id": "l", "name": "كبير", "price": 500 }], "available": true, "mock": ["price", "desc"] },
+            { "id": "pizza-veggie", "name": "بيتزا خضار", "desc": "فليفلة، زيتون أسود، ذرة وجبنة.", "img": "bakery-pizza-veggie", "sizes": [{ "id": "s", "name": "صغير", "price": 320 }, { "id": "m", "name": "وسط", "price": 420 }, { "id": "l", "name": "كبير", "price": 520 }], "available": true, "mock": ["price", "desc"] },
+            { "id": "pizza-pepperoni", "name": "بيتزا بيبروني", "desc": "بيبروني وموزاريلا، الحوافي مقرمشة.", "img": "bakery-pizza-pepperoni", "sizes": [{ "id": "s", "name": "صغير", "price": 380 }, { "id": "m", "name": "وسط", "price": 480 }, { "id": "l", "name": "كبير", "price": 600 }], "available": true, "mock": ["price", "desc"] },
+            { "id": "pizza-buffalo", "name": "بيتزا دجاج بافلو", "desc": "قطع دجاج مع صوص بافلو حار فوقها.", "img": "bakery-pizza-buffalo", "sizes": [{ "id": "s", "name": "صغير", "price": 400 }, { "id": "m", "name": "وسط", "price": 500 }, { "id": "l", "name": "كبير", "price": 620 }], "available": true, "mock": ["price", "desc"] },
+            { "id": "pizza-mix", "name": "بيتزا نص ونص", "desc": "نص دجاج ونص خضار، لما ما تقدر تختار.", "img": "bakery-pizza-mix", "sizes": [{ "id": "m", "name": "وسط", "price": 520 }, { "id": "l", "name": "كبير", "price": 650 }], "available": true, "mock": ["price", "desc"] }
+          ]
+        },
+        {
+          "id": "fatayer",
+          "name": "فطاير",
+          "items": [
+            { "id": "fatayer-spinach", "name": "فطيرة سبانخ", "desc": "سبانخ بالسماق والبصل.", "img": null, "price": 60, "available": true, "mock": ["name", "price", "desc", "img"] },
+            { "id": "fatayer-cheese", "name": "فطيرة جبنة", "desc": "جبنة بيضا مع حبة البركة.", "img": null, "price": 70, "available": true, "mock": ["name", "price", "desc", "img"] },
+            { "id": "fatayer-meat", "name": "فطيرة لحمة", "desc": "لحمة ودبس رمان.", "img": null, "price": 90, "available": false, "mock": ["name", "price", "desc", "img"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "snack",
+      "nameEn": "Golden Snack",
+      "nameAr": "غولدن سناك",
+      "monogram": "GS",
+      "kind": "كرسبي · فاهيتا · فروج",
+      "tagline": "Bite into happiness — أعطي السيطرة الكاملة لكرشك.",
+      "story": "الناس حبّت الطعمة وطلبت أكتر، فطلع Golden Snack: كرسبي وفاهيتا وبرغر وفروج، وبطاطا مقرمشة لوقت الجوعة الجد.",
+      "cover": "snack-cover",
+      "storefront": "snack-storefront",
+      "phone": "0969864576",
+      "address": "السويداء — طريق قنوات، جانب فندق العامر",
+      "mapsQuery": "فندق العامر السويداء",
+      "hours": { "open": "12:00", "close": "01:00" },
+      "facebook": "https://www.facebook.com/share/1DQr3EyLVr/",
+      "instagram": "https://www.instagram.com/",
+      "mock": ["hours", "instagram"],
+      "categories": [
+        {
+          "id": "sandwiches",
+          "name": "سندويش",
+          "items": [
+            { "id": "crispy", "name": "كرسبي", "desc": "صدر دجاج مقرمش، خس، صوص الغولدن.", "img": "snack-crispy", "price": 300, "available": true, "mock": ["name", "price", "desc", "img"] },
+            { "id": "zinger", "name": "زنجر", "desc": "كرسبي حار مع شيدر.", "img": "snack-zinger", "price": 320, "available": true, "mock": ["name", "price", "desc", "img"] },
+            { "id": "fajita", "name": "فاهيتا", "desc": "دجاج مع فليفلة وبصل مشوي وجبنة.", "img": "snack-fajita", "price": 330, "available": true, "mock": ["name", "price", "desc", "img"] },
+            { "id": "escalope", "name": "سكالوب", "desc": "سكالوب دجاج مع بطاطا وثومية.", "img": "snack-escalope", "price": 330, "available": false, "mock": ["name", "price", "desc", "img"] },
+            { "id": "burger", "name": "برغر لحمة", "desc": "قطعة لحمة مشوية، شيدر، صوص خاص.", "img": "snack-burger", "price": 380, "available": true, "mock": ["name", "price", "desc", "img"] }
+          ]
+        },
+        {
+          "id": "meals",
+          "name": "وجبات",
+          "items": [
+            { "id": "crispy-meal", "name": "وجبة كرسبي", "desc": "4 قطع كرسبي، بطاطا، ثومية وكول سلو.", "img": "snack-crispy-meal", "price": 600, "available": true, "mock": ["name", "price", "desc", "img"] },
+            { "id": "fajita-meal", "name": "وجبة فاهيتا", "desc": "فاهيتا بالصحن مع بطاطا وخبز.", "img": "snack-fajita-meal", "price": 550, "available": true, "mock": ["name", "price", "desc", "img"] },
+            { "id": "burger-meal", "name": "وجبة برغر", "desc": "برغر لحمة مع بطاطا ومشروب.", "img": "snack-burger-meal", "price": 550, "available": true, "mock": ["name", "price", "desc", "img"] }
+          ]
+        },
+        {
+          "id": "chicken",
+          "name": "فروج",
+          "items": [
+            { "id": "grilled-chicken", "name": "فروج مشوي", "desc": "مع ثومية وبطاطا ومخلل.", "img": "snack-grilled-chicken", "sizes": [{ "id": "half", "name": "نص", "price": 500 }, { "id": "whole", "name": "كامل", "price": 900 }], "available": true, "mock": ["name", "price", "desc", "img"] },
+            { "id": "broasted", "name": "بروستد", "desc": "مقرمش من برّا وطري من جوّا.", "img": "snack-broasted", "sizes": [{ "id": "4", "name": "4 قطع", "price": 550 }, { "id": "8", "name": "8 قطع", "price": 1000 }], "available": true, "mock": ["name", "price", "desc", "img"] }
+          ]
+        },
+        {
+          "id": "sides",
+          "name": "إضافات",
+          "items": [
+            { "id": "fries", "name": "بطاطا", "desc": "مقلية طازة ومملّحة عالطلب.", "img": "snack-fries", "price": 120, "available": true, "mock": ["price", "desc", "img"] },
+            { "id": "toum", "name": "ثومية", "desc": "علبة صغيرة.", "img": "snack-toum", "price": 30, "available": true, "mock": ["name", "price", "desc", "img"] },
+            { "id": "soda", "name": "مشروب غازي", "desc": "علبة باردة.", "img": "snack-soda", "price": 60, "available": true, "mock": ["name", "price", "desc", "img"] }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "meals",
+      "nameEn": "Golden Meals",
+      "nameAr": "مخبز ومأكولات غولدن",
+      "monogram": "GM",
+      "kind": "طبخ يومي · مناقيش عالصاج",
+      "tagline": "طبخة كل يوم متل طبخ البيت، ومناقيش عالصاج سخنة.",
+      "story": "وبعدها رجعنا للأساس: طبخ بيتي كل يوم، رز وطبخات وصاج عالنار، للي بدّو أكلة تشبع متل أكل الإم.",
+      "cover": "meals-bukhari",
+      "storefront": "meals-storefront",
+      "phone": "0938750727",
+      "address": "السويداء",
+      "mapsQuery": "مخبز ومأكولات غولدن السويداء",
+      "hours": { "open": "11:00", "close": "22:00" },
+      "facebook": "https://www.facebook.com/",
+      "instagram": "https://www.instagram.com/",
+      "mock": ["address", "hours", "facebook", "instagram"],
+      "categories": [
+        {
+          "id": "daily",
+          "name": "طبخة اليوم",
+          "items": [
+            { "id": "mulukhiya", "name": "ملوخية ورق بالفروج", "desc": "مع رز بشعيرية، مكسرات وخبز محمّص وليمون.", "img": "meals-mulukhiya", "price": 550, "available": true, "mock": ["price", "desc"] },
+            { "id": "bukhari", "name": "رز بخاري بالفروج", "desc": "فخدة فروج مشوية فوق رز بخاري ومكسرات، مع سلطة وصوصين.", "img": "meals-bukhari", "price": 600, "available": true, "mock": ["price", "desc"] },
+            { "id": "rice-peas", "name": "رز ع بازيلا ولحمة", "desc": "رز مع لحمة مفرومة وقطع لحمة وبازيلا وجزر ومكسرات.", "img": "meals-rice-peas", "price": 650, "available": true, "mock": ["price", "desc"] },
+            { "id": "chicken-rice", "name": "صدر دجاج مع رز", "desc": "صدر دجاج مشوي، رز أبيض وبطاطا مسلوقة.", "img": "meals-chicken-rice", "price": 550, "available": true, "mock": ["price", "desc"] },
+            { "id": "fettuccine", "name": "فيتوتشيني ألفريدو", "desc": "باستا بصوص الكريمة مع دجاج وفطر.", "img": "meals-fettuccine", "price": 500, "available": true, "mock": ["price", "desc"] }
+          ]
+        },
+        {
+          "id": "saj",
+          "name": "عالصاج",
+          "items": [
+            { "id": "saj-bread", "name": "خبز صاج", "desc": "رغيف رقيق طالع عن الصاج هلّق.", "img": "meals-saj-bread", "price": 50, "available": true, "mock": ["price", "desc"] },
+            { "id": "saj-zaatar", "name": "زعتر عالصاج", "desc": "زعتر وزيت على رغيف صاج.", "img": "meals-saj-griddle", "price": 90, "available": true, "mock": ["price", "desc"] },
+            { "id": "saj-cheese", "name": "جبنة عالصاج", "desc": "جبنة مشلّلة ذايبة.", "img": null, "price": 140, "available": true, "mock": ["name", "price", "desc", "img"] },
+            { "id": "saj-muhammara", "name": "محمّرة عالصاج", "desc": "محمّرة حرّة مع جوز.", "img": null, "price": 120, "available": true, "mock": ["name", "price", "desc", "img"] },
+            { "id": "saj-kishk", "name": "كشك عالصاج", "desc": "كشك بلدي مع بصل وبندورة.", "img": null, "price": 120, "available": true, "mock": ["name", "price", "desc", "img"] }
+          ]
+        }
+      ]
+    }
+  ]
+}

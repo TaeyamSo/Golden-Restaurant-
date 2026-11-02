@@ -1,0 +1,5 @@
+node_modules/
+# raw WhatsApp source media (24 MB); the site uses the optimized copies in assets/
+imgvid/
+# local Claude Code preview config
+.claude/

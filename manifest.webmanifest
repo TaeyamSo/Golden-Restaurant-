@@ -1,0 +1,25 @@
+{
+  "id": "./",
+  "name": "غولدن Golden — السويداء",
+  "short_name": "غولدن",
+  "description": "منيو Golden Bakery و Golden Snack ومخبز ومأكولات غولدن. شوف الأسعار وجهّز طلبك واتصل.",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1E1410",
+  "theme_color": "#1E1410",
+  "categories": ["food", "shopping"],
+  "icons": [
+    { "src": "assets/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "منيو Golden Bakery", "short_name": "Bakery", "url": "./#menu/bakery", "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "منيو Golden Snack", "short_name": "Snack", "url": "./#menu/snack", "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }] },
+    { "name": "منيو Golden Meals", "short_name": "Meals", "url": "./#menu/meals", "icons": [{ "src": "assets/icons/icon-192.png", "sizes": "192x192" }] }
+  ]
+}

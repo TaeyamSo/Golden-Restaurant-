@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>غولدن Golden — مناقيش، سناك وطبخ بيتي بالسويداء</title>
+  <meta name="description" content="غولدن: Golden Bakery و Golden Snack ومخبز ومأكولات غولدن بالسويداء. شوف المنيو والأسعار، جهّز طلبك واتصل.">
+  <meta name="theme-color" content="#1E1410">
+  <meta property="og:title" content="غولدن Golden — السويداء">
+  <meta property="og:description" content="تلات محلات وطعمة وحدة. شوف المنيو والأسعار واطلب بالتلفون.">
+  <meta property="og:image" content="assets/img/hero-1080.webp">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="assets/icons/favicon-32.png" sizes="32x32">
+  <link rel="apple-touch-icon" href="assets/icons/apple-touch-icon.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="preload" as="image" media="(max-aspect-ratio: 1/1)" imagesrcset="assets/img/hero-p-720.webp 720w, assets/img/hero-p-1080.webp 1080w" imagesizes="100vw" fetchpriority="high">
+  <link rel="preload" as="image" media="(min-aspect-ratio: 1001/1000)" imagesrcset="assets/img/hero-1080.webp 1080w, assets/img/hero-1600.webp 1600w, assets/img/hero-2200.webp 2200w" imagesizes="100vw" fetchpriority="high">
+  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/reem-kufi-500-700-arabic.woff2" crossorigin>
+  <link rel="preload" as="font" type="font/woff2" href="assets/fonts/ibm-plex-sans-arabic-400-arabic.woff2" crossorigin>
+  <!-- Stylesheets load without blocking, so the first thing painted on a slow connection is the loader below. -->
+  <link rel="preload" as="style" href="assets/css/fonts.css" onload="this.onload=null;this.rel='stylesheet'">
+  <link rel="preload" as="style" href="assets/css/main.css" onload="this.onload=null;this.rel='stylesheet'">
+  <noscript><link rel="stylesheet" href="assets/css/fonts.css"><link rel="stylesheet" href="assets/css/main.css"></noscript>
+  <style>
+    body { margin: 0; background: #1E1410; }
+    .loader { display: none; }
+    html.js:not(.ready), html.js:not(.ready) body { overflow: hidden; }
+    .js .loader {
+      position: fixed; inset: 0; z-index: 200; display: grid; place-items: center; background: #1E1410;
+      clip-path: inset(0 0 0 0); transition: clip-path .95s cubic-bezier(.76, 0, .24, 1), visibility 0s .95s;
+    }
+    .ready .loader { clip-path: inset(0 0 100% 0); visibility: hidden; }
+    .ld-mark { display: grid; justify-items: center; gap: 22px; width: min(64vw, 330px); transition: transform .95s cubic-bezier(.76, 0, .24, 1), opacity .6s; }
+    .ready .ld-mark { transform: translateY(-56px); opacity: 0; }
+    .ld-ar { width: 100%; height: auto; overflow: visible; }
+    /* handwriting: the gold letters show only where the pen strokes in the mask have drawn (timings baked in by
+       tools/brand-svg.mjs: --s start, --t duration), so the ink appears along the pen's path, right to left */
+    .ld-pen {
+      fill: none; stroke: #fff; stroke-linecap: round; stroke-linejoin: round;
+      stroke-dasharray: 1; stroke-dashoffset: 1;
+      animation: ld-draw var(--t) linear var(--s) forwards;
+    }
+    .ld-all { opacity: 0; animation: ld-show .35s ease-out var(--s) forwards; }
+    .ld-en { width: 56%; height: auto; overflow: visible; }
+    .ld-en path {
+      fill: #C9A24A; opacity: 0; transform-box: fill-box; transform-origin: 50% 100%;
+      animation: ld-rise .6s cubic-bezier(.2, .8, .2, 1) forwards; animation-delay: calc(1.95s + var(--i) * .07s);
+    }
+    .ld-bar { width: 64px; height: 2px; border-radius: 2px; background: rgba(242, 230, 211, .14); overflow: hidden; }
+    .ld-bar i { display: block; height: 100%; width: 6%; background: #C9A24A; transition: width .5s ease; }
+    @keyframes ld-draw { to { stroke-dashoffset: 0; } }
+    @keyframes ld-show { to { opacity: 1; } }
+    @keyframes ld-rise { from { opacity: 0; transform: translateY(45%); } to { opacity: 1; transform: none; } }
+    @media (prefers-reduced-motion: reduce) {
+      .ld-pen, .ld-all, .ld-en path { animation: none; stroke-dashoffset: 0; opacity: 1; transform: none; }
+      .js .loader, .ld-mark { transition-duration: .2s; }
+    }
+  </style>
+  <script>
+    // Loading screen: plays the wordmark, then opens the page once the styles, fonts, hero photo and the start of
+    // reel 1 are ready. Minimum 2.9 s so the writing finishes; anything slower than 6 s is not waited for.
+    (function () {
+      var d = document, h = d.documentElement, G = window.__golden = {};
+      h.classList.add('js');
+      if (/[?&]clean\b/.test(location.search)) h.classList.add('hide-mock');
+      var t0 = Date.now(), CAP = 6000, HARD = 12000;
+      var MIN = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches ? 600 : 2900;
+      var total = 0, done = 0;
+      function bar(pct) { var b = d.getElementById('ldBar'); if (b) b.style.width = pct + '%'; }
+      function track(p) { total++; return p.then(function () { done++; bar(Math.round(done / total * 100)); }); }
+      function wait(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+      var dom = new Promise(function (r) { d.readyState === 'loading' ? d.addEventListener('DOMContentLoaded', r) : r(); });
+
+      // main.css defines --espresso; poll for it (also covers browsers without the preload onload swap)
+      var css = dom.then(function () {
+        [].forEach.call(d.querySelectorAll('link[rel=preload][as=style]'), function (l) {
+          var ok = false; try { ok = l.relList.supports('preload'); } catch (e) {}
+          if (!ok) l.rel = 'stylesheet';
+        });
+        return new Promise(function (r) {
+          (function poll() {
+            if (getComputedStyle(h).getPropertyValue('--espresso') || Date.now() - t0 > HARD) r(); else setTimeout(poll, 40);
+          })();
+        });
+      });
+      var hero = dom.then(function () {
+        var img = d.querySelector('.hero-img');
+        if (!img) return;
+        var loaded = img.complete ? Promise.resolve() : new Promise(function (r) { img.addEventListener('load', r); img.addEventListener('error', r); });
+        return loaded.then(function () { return img.decode ? img.decode().catch(function () {}) : 0; });
+      });
+      var fonts = css.then(function () {
+        if (!d.fonts || !d.fonts.load) return;
+        return Promise.all([d.fonts.load('600 40px "Reem Kufi"', 'غولدن'), d.fonts.load('16px "IBM Plex Sans Arabic"', 'منيو')]).catch(function () {});
+      });
+      // buffer the start of reel 1 (reels.js reuses this same element), unless the visitor is saving data.
+      // It starts only after the styles and hero photo are in, so it never slows the page itself.
+      // The element exists from the start so reels.js can adopt it whenever it renders; it gets its src later.
+      var c = navigator.connection || {}, reel = Promise.resolve();
+      if (!c.saveData && !/2g/.test(c.effectiveType || '')) {
+        var v = G.reel = d.createElement('video');
+        G.reelSrc = 'assets/video/reel-1.mp4';
+        v.muted = true; v.playsInline = true; v.setAttribute('playsinline', ''); v.preload = 'auto';
+        reel = Promise.all([css, hero]).then(function () {
+          if (v.getAttribute('src')) return; // already started by a tap
+          var buffered = new Promise(function (r) { v.addEventListener('canplay', r); v.addEventListener('error', r); });
+          v.src = G.reelSrc;
+          v.load();
+          return buffered;
+        });
+      }
+
+      var assets = Promise.all([track(css), track(hero), track(fonts), track(reel)]);
+      Promise.all([css, wait(MIN), Promise.race([assets, wait(CAP)])]).then(function () {
+        bar(100);
+        h.classList.add('ready');
+        setTimeout(function () { var l = d.getElementById('loader'); if (l) l.parentNode.removeChild(l); }, 1100);
+      });
+    })();
+  </script>
+  <script type="module" src="assets/js/app.js"></script>
+</head>
+<body>
+  <div class="loader" id="loader" aria-hidden="true">
+    <div class="ld-mark">
+    <!-- loader:start -->
+    <svg class="ld-ar" viewBox="-49 -1018 1880 1058" role="img" aria-label="غولدن"><defs><linearGradient id="ldShine" gradientUnits="userSpaceOnUse" x1="-49" y1="0" x2="1831" y2="0"><stop offset="0" stop-color="#B98A2F"/><stop offset=".44" stop-color="#E2BE6A"/><stop offset=".5" stop-color="#FFF0C4"/><stop offset=".56" stop-color="#E2BE6A"/><stop offset="1" stop-color="#B98A2F"/><animateTransform attributeName="gradientTransform" type="translate" from="1880 0" to="-1880 0" dur="1.3s" begin="2.25s" fill="freeze"/></linearGradient><mask id="ldInk" maskUnits="userSpaceOnUse" x="-49" y="-1018" width="1880" height="1058"><path class="ld-pen" pathLength="1" stroke-width="180.5" style="--s:0.250s;--t:0.224s" d="M1677.8 -666.6L1635.0 -643.9L1622.4 -626.3L1556.9 -598.6L1549.3 -588.5L1539.3 -518.0L1567.0 -417.2L1572.0 -412.2L1582.1 -412.2L1698.0 -437.4L1710.6 -444.9L1763.5 -500.3"/><path class="ld-pen" pathLength="1" stroke-width="197.3" style="--s:0.474s;--t:0.364s" d="M1572.0 -412.2L1551.9 -384.5L1511.5 -371.9L1403.2 -351.7L1284.8 -341.6L1274.8 -324.0L1307.5 -288.7L1305.0 -248.4L1297.4 -210.6L1249.6 -157.7L1158.9 -99.8L1078.3 -64.5L1017.8 -46.9L894.4 -26.8"/><path class="ld-pen" pathLength="1" stroke-width="118.4" style="--s:0.958s;--t:0.033s" d="M1602.2 -936.1L1604.8 -895.8L1584.6 -873.2L1587.1 -863.1"/><path class="ld-pen" pathLength="1" stroke-width="153.7" style="--s:1.111s;--t:0.471s" d="M975.0 -696.8L944.8 -558.3L952.3 -311.4L932.2 -200.6L889.3 -170.3L846.5 -150.2L763.4 -132.6L725.6 -137.6L702.9 -122.5L634.9 -114.9L584.5 -87.2L546.8 -74.6L350.3 -94.8"/><path class="ld-pen" pathLength="1" stroke-width="146.9" style="--s:1.581s;--t:0.045s" d="M713.0 -240.9L705.5 -200.6L708.0 -170.3L728.1 -140.1"/><path class="ld-pen" pathLength="1" stroke-width="153.7" style="--s:1.746s;--t:0.404s" d="M388.1 -580.9L388.1 -512.9L383.0 -472.6L385.5 -414.7L370.4 -303.9L299.9 -230.8L264.6 -208.1L229.4 -193.0L148.7 -175.4L108.4 -180.4L58.1 -203.1L37.9 -223.2L25.3 -245.9L22.8 -281.2L27.8 -321.5L45.5 -374.4L80.7 -452.5L90.8 -462.6L146.2 -487.7L156.3 -502.9"/><rect class="ld-all" x="-49" y="-1018" width="1880" height="1058" fill="#fff" style="--s:2.05s"/></mask></defs><g mask="url(#ldInk)" fill="url(#ldShine)"><path d="M348 -330L348 -327Q337 -317 325 -308Q313 -299 299 -291Q270 -274 232 -260Q193 -247 148 -247Q135 -247 122 -248Q108 -249 92 -252Q49 -272 49 -304Q49 -312 52 -319Q54 -326 56 -333L55 -332Q66 -361 78 -389Q89 -417 102 -443L163 -403Q175 -396 180 -407Q196 -435 211 -462Q226 -490 242 -518Q245 -523 244 -527Q242 -532 239 -534L160 -586L159 -586L145 -594Q141 -597 136 -595Q131 -594 129 -590L115 -565Q88 -518 60 -461Q31 -404 14 -357Q-9 -291 -9 -246Q-9 -244 -9 -242Q-9 -241 -9 -238Q-9 -236 -8 -234Q-8 -233 -8 -231Q-3 -186 15 -151Q32 -116 64 -100L64 -101Q80 -94 97 -89Q113 -85 130 -85Q149 -85 169 -89Q189 -94 211 -101Q297 -133 352 -212Q366 -232 377 -254Q388 -276 397 -298Q411 -332 421 -369Q430 -406 430 -451Q430 -519 398 -588Q395 -596 388 -596Q380 -596 377 -588L322 -463Q331 -432 340 -401Q348 -370 348 -330Z"/><path d="M693 -182Q681 -182 672 -173Q655 -158 631 -153Q598 -148 559 -143Q520 -138 485 -136Q448 -134 410 -128Q371 -122 339 -114Q332 -112 327 -107Q321 -103 321 -95Q321 -88 327 -82Q333 -77 353 -67Q372 -57 403 -43Q439 -28 474 -14Q509 0 552 0Q573 0 588 -4Q602 -9 616 -19Q633 -31 646 -49Q659 -68 673 -87Q686 -107 702 -119Q721 -127 721 -154Q721 -165 714 -173Q707 -182 693 -182Z"/><path d="M907 -229Q874 -215 835 -204Q821 -200 809 -198Q796 -196 785 -196Q758 -196 744 -206Q729 -216 729 -244L729 -248Q728 -264 714 -264Q705 -264 698 -254Q682 -231 673 -204Q664 -177 659 -148Q658 -143 658 -138Q657 -133 657 -128Q657 -94 680 -71Q703 -48 743 -48Q767 -48 788 -55Q829 -69 861 -86Q962 -140 991 -255Q1003 -299 1003 -347Q1003 -350 1003 -351Q1003 -352 1003 -355Q1003 -357 1003 -359Q1003 -361 1003 -363L986 -699Q986 -707 978 -709Q969 -712 965 -705L891 -588Q896 -505 901 -411Q906 -317 907 -229Z"/><path d="M1177 -266L1177 -267Q1195 -245 1239 -245Q1255 -245 1268 -248Q1270 -244 1271 -241Q1271 -240 1271 -238Q1271 -237 1271 -235Q1271 -234 1272 -233Q1272 -233 1272 -233L1272 -232Q1245 -202 1204 -185Q1121 -151 1035 -118Q949 -85 873 -43Q864 -37 864 -25Q864 -10 880 -8Q909 -6 939 -3Q969 0 999 0Q1003 0 1004 0Q1005 0 1009 0Q1034 0 1056 -2Q1078 -4 1100 -8L1100 -8Q1150 -18 1192 -46Q1234 -75 1268 -113Q1301 -152 1323 -193Q1338 -222 1349 -257Q1360 -293 1361 -333L1361 -339Q1361 -408 1313 -457Q1306 -464 1295 -471Q1283 -478 1269 -478Q1256 -478 1243 -465Q1225 -445 1213 -420Q1201 -396 1189 -370Q1182 -356 1173 -337Q1163 -319 1163 -301Q1163 -289 1167 -281Q1171 -273 1177 -266Z"/><path d="M1675 -911L1609 -974Q1605 -978 1600 -977Q1594 -976 1591 -972Q1572 -947 1553 -923Q1533 -899 1513 -874Q1507 -866 1514 -859L1581 -796Q1585 -792 1590 -792Q1595 -793 1598 -797Q1608 -809 1613 -815Q1617 -822 1622 -828Q1627 -834 1637 -846Q1647 -858 1657 -870Q1667 -882 1677 -895Q1682 -904 1675 -911Z"/><path d="M1777 -529Q1776 -529 1775 -529Q1774 -529 1772 -529Q1771 -529 1768 -526Q1760 -523 1752 -519Q1743 -516 1735 -512Q1713 -502 1691 -492Q1668 -482 1636 -480Q1618 -496 1604 -517Q1590 -538 1582 -564Q1603 -562 1624 -557Q1645 -552 1666 -546Q1676 -543 1680 -553L1721 -678Q1723 -684 1720 -688Q1717 -693 1712 -694L1696 -698L1697 -697Q1677 -702 1658 -706Q1639 -710 1616 -711Q1579 -711 1550 -676Q1526 -646 1509 -601Q1492 -556 1491 -505Q1490 -502 1490 -498Q1490 -480 1494 -465Q1497 -450 1502 -437Q1461 -427 1418 -421Q1375 -416 1323 -408Q1315 -406 1313 -398L1290 -273Q1289 -266 1293 -262Q1297 -258 1304 -259Q1358 -270 1411 -282Q1464 -294 1518 -307Q1579 -321 1633 -341Q1687 -362 1736 -389L1742 -395L1749 -410Q1758 -430 1769 -453Q1780 -477 1787 -498L1787 -498Q1791 -507 1791 -513Q1791 -529 1777 -529Z"/></g></svg>
+    <svg class="ld-en" viewBox="33 -779 6515 827" role="img" aria-label="GOLDEN"><path style="--i:0" d="M686 -71Q672 -57 645 -43Q617 -29 582 -17Q546 -6 509 1Q472 8 439 8Q321 8 234 -38Q147 -84 100 -164Q53 -244 53 -347Q53 -445 83 -519Q113 -593 166 -642Q218 -691 286 -715Q353 -740 428 -740Q497 -740 555 -725Q613 -710 654 -687L611 -564Q592 -575 562 -585Q532 -595 501 -601Q470 -608 445 -608Q365 -608 307 -579Q249 -551 219 -495Q189 -439 189 -359Q189 -287 221 -234Q253 -181 311 -152Q368 -123 442 -123Q475 -123 504 -128Q533 -134 553 -145L553 -249L421 -249L421 -376L686 -376L686 -71Z"/><path style="--i:1" d="M1232 -366Q1232 -441 1261 -509Q1289 -577 1341 -629Q1392 -681 1460 -710Q1527 -740 1604 -740Q1681 -740 1749 -710Q1817 -681 1869 -629Q1921 -577 1951 -509Q1980 -441 1980 -365Q1980 -288 1951 -220Q1921 -153 1869 -101Q1817 -50 1749 -21Q1681 8 1604 8Q1528 8 1460 -21Q1392 -50 1341 -101Q1289 -152 1261 -219Q1232 -287 1232 -366ZM1368 -365Q1368 -297 1400 -241Q1432 -185 1487 -152Q1541 -119 1609 -119Q1675 -119 1729 -152Q1782 -185 1813 -241Q1844 -297 1844 -365Q1844 -435 1812 -491Q1780 -547 1727 -580Q1673 -613 1606 -613Q1538 -613 1485 -580Q1431 -547 1400 -491Q1368 -435 1368 -365Z"/><path style="--i:2" d="M2551 -732L2682 -732L2682 -127L3034 -127L3034 0L2551 0L2551 -732Z"/><path style="--i:3" d="M3607 0L3607 -732L3820 -732Q3930 -732 4007 -699Q4084 -667 4132 -612Q4179 -557 4201 -489Q4223 -422 4223 -354Q4223 -273 4194 -207Q4164 -142 4114 -95Q4063 -49 3997 -24Q3930 0 3856 0L3607 0ZM3738 -127L3833 -127Q3908 -127 3965 -154Q4022 -181 4055 -233Q4087 -286 4087 -363Q4087 -434 4064 -481Q4040 -528 4005 -555Q3970 -583 3931 -594Q3891 -606 3858 -606L3738 -606L3738 -127Z"/><path style="--i:4" d="M4793 -732L5286 -732L5286 -605L4924 -605L4924 -431L5245 -431L5245 -304L4924 -304L4924 -127L5300 -127L5300 0L4793 0L4793 -732Z"/><path style="--i:5" d="M6524 28L5966 -494L6005 -474L6008 0L5875 0L5875 -759L5880 -759L6428 -239L6399 -250L6396 -732L6528 -732L6528 28L6524 28Z"/></svg>
+    <!-- loader:end -->
+      <span class="ld-bar"><i id="ldBar"></i></span>
+    </div>
+  </div>
+
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-bag" viewBox="0 0 24 24"><path d="M6 8h12l-1 12H7L6 8Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-phone" viewBox="0 0 24 24"><path d="M7.2 3.5h2.3l1.4 4.1-1.9 1.3a11 11 0 0 0 6.1 6.1l1.3-1.9 4.1 1.4v2.3a2 2 0 0 1-2.1 2A16.5 16.5 0 0 1 5.2 5.6a2 2 0 0 1 2-2.1Z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></symbol>
+    <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    <symbol id="i-minus" viewBox="0 0 24 24"><path d="M5 12h14" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5.5v13l11-6.5-11-6.5Z" fill="currentColor"/></symbol>
+    <symbol id="i-pause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z" fill="currentColor"/></symbol>
+    <symbol id="i-sound" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4v-5Z" fill="currentColor"/><path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-mute" viewBox="0 0 24 24"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4v-5Z" fill="currentColor"/><path d="m15.5 9.5 5 5m0-5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-pin" viewBox="0 0 24 24"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11Z" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="10" r="2.3" fill="currentColor"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M12 7.5V12l3 2" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></symbol>
+    <symbol id="i-fb" viewBox="0 0 24 24"><path d="M13.5 21v-7.5h2.6l.4-3h-3V8.6c0-.9.3-1.5 1.6-1.5h1.6V4.4a21 21 0 0 0-2.4-.1c-2.4 0-4 1.4-4 4.1v2.1H7.7v3h2.6V21h3.2Z" fill="currentColor"/></symbol>
+    <symbol id="i-ig" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="5" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="12" cy="12" r="4" fill="none" stroke="currentColor" stroke-width="1.8"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M19 12H5m0 0 5.5-5.5M5 12l5.5 5.5" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="11.5" height="11.5" rx="2.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M15.5 8V6.5A2 2 0 0 0 13.5 4.5h-7a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2H8" fill="none" stroke="currentColor" stroke-width="1.8"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="m5 12.5 4.5 4.5L19 7.5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19.5h14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M5 7h14M10 7V5h4v2M7 7l1 12.5h8L17 7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  </svg>
+
+  <a class="skip" href="#menu">انتقل للمنيو</a>
+
+  <header class="topbar" id="topbar">
+    <a class="wordmark" href="#top" aria-label="غولدن — فوق">
+      <span class="wm-en">GOLDEN</span><span class="wm-rule" aria-hidden="true"></span><span class="wm-ar">غولدن</span>
+    </a>
+    <nav class="topnav" aria-label="أقسام الصفحة">
+      <a href="#stores">المحلات</a>
+      <a href="#reels">ريلز</a>
+      <a href="#menu">المنيو</a>
+      <a href="#visit">وين نحنا</a>
+    </nav>
+    <button class="icon-btn cart-btn" type="button" data-open-order aria-label="طلبك">
+      <svg><use href="#i-bag"/></svg>
+      <span class="badge" id="cartBadge" hidden>0</span>
+    </button>
+  </header>
+
+  <div class="draft-chip" id="draftChip" hidden>
+    <span>عم تشوف تعديلات الأدمن</span>
+    <button type="button" id="draftReset">رجّع الأصل</button>
+  </div>
+
+  <main>
+    <section class="hero" id="top">
+      <picture>
+        <!-- phones get a portrait crop of the photo so it stays sharp without downloading the full-width file -->
+        <source media="(max-aspect-ratio: 1/1)" srcset="assets/img/hero-p-720.webp 720w, assets/img/hero-p-1080.webp 1080w" sizes="100vw">
+        <img class="hero-img" src="assets/img/hero-1600.webp"
+             srcset="assets/img/hero-1080.webp 1080w, assets/img/hero-1600.webp 1600w, assets/img/hero-2200.webp 2200w" sizes="100vw"
+             width="2200" height="1466" alt="بيتزا عم تنشوى بفرن الحطب والنار حواليها" fetchpriority="high">
+      </picture>
+      <div class="hero-shade" aria-hidden="true"></div>
+      <div class="hero-content wrap">
+        <p class="eyebrow eyebrow-light"><span class="pulse" aria-hidden="true"></span>السويداء · تلات محلات وطعمة وحدة</p>
+        <h1 class="hero-title">
+          <span class="line"><span>من الفرن</span></span>
+          <span class="line"><span>لـ<em>إيدك.</em></span></span>
+        </h1>
+        <p class="hero-sub">مناقيش وبيتزا، كرسبي وفروج، وطبخة بيتية كل يوم. شوف الأسعار، جهّز طلبك، واتصل. بس هيك.</p>
+        <div class="hero-cta">
+          <a class="btn btn-gold" href="#menu">شوف المنيو <svg><use href="#i-arrow"/></svg></a>
+          <button class="btn btn-line" type="button" data-open-call><svg><use href="#i-phone"/></svg> اتصل واطلب</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-dark stores" id="stores" aria-labelledby="storesTitle">
+      <div class="wrap section-head" data-reveal>
+        <p class="eyebrow">الحكاية</p>
+        <h2 id="storesTitle">تلات محلات، عيلة وحدة.</h2>
+        <p class="lead">بلّشنا بفرن مناقيش، والناس حبّت الطعمة. فكبرت العيلة محل ورا محل.</p>
+      </div>
+      <div class="snap-row stores-row" id="storesRow"></div>
+    </section>
+
+    <section class="section section-dark reels" id="reels" aria-labelledby="reelsTitle">
+      <div class="wrap section-head" data-reveal>
+        <p class="eyebrow">ريلز</p>
+        <h2 id="reelsTitle">شوفونا من جوّا.</h2>
+        <p class="lead">اسحب يمين ويسار. الفيديو ما بيحمّل إلا لما تكبس عليه، كرمال النت.</p>
+      </div>
+      <div class="snap-row reels-row" id="reelsRow"></div>
+      <div class="dots" id="reelDots" aria-hidden="true"></div>
+    </section>
+
+    <section class="section section-paper menu" id="menu" aria-labelledby="menuTitle">
+      <div class="wrap section-head" data-reveal>
+        <p class="eyebrow">المنيو</p>
+        <h2 id="menuTitle">شو جاي عبالك اليوم؟</h2>
+        <p class="lead">اختار المحل، زيد يلي بدك ياه، ولما تخلص اتصل واطلب. كل محل إلو طلب لحال.</p>
+      </div>
+      <div class="menu-nav" id="menuNav">
+        <div class="store-tabs" id="storeTabs" role="tablist" aria-label="المحلات"></div>
+        <div class="cat-chips" id="catChips" aria-label="الأقسام"></div>
+      </div>
+      <div class="wrap">
+        <div class="store-strip" id="storeStrip"></div>
+        <div class="menu-list" id="menuList" aria-live="polite"></div>
+      </div>
+    </section>
+
+    <section class="section section-dark visit" id="visit" aria-labelledby="visitTitle">
+      <div class="wrap section-head" data-reveal>
+        <p class="eyebrow">تعو لعنا</p>
+        <h2 id="visitTitle">وين تلاقونا.</h2>
+      </div>
+      <div class="snap-row visit-row" id="visitGrid"></div>
+      <!-- Reserved slot: creative 3D / real-photo map, to be planned with the owner. -->
+      <p class="wrap sign" data-reveal><span class="sign-quote">كل الحب، عائلة غولدن.</span></p>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-in">
+      <a class="wordmark wordmark-lg" href="#top" aria-label="غولدن — فوق">
+        <span class="wm-en">GOLDEN</span><span class="wm-rule" aria-hidden="true"></span><span class="wm-ar">غولدن</span>
+      </a>
+      <div class="footer-social" id="footerSocial"></div>
+      <button class="btn btn-line btn-sm" type="button" id="installBtn" hidden><svg><use href="#i-download"/></svg> نزّل التطبيق عموبايلك</button>
+      <p class="footer-note">© 2026 Golden · السويداء — <a href="admin/">لوحة التحكم (تجريبي)</a></p>
+      <p class="footer-credit">Made By Tayam</p>
+    </div>
+  </footer>
+
+  <div class="cart-bar" id="cartBar" hidden>
+    <button class="cart-bar-btn" type="button" data-open-order>
+      <span class="mono mono-sm" id="cbMono"></span>
+      <span class="cb-text"><b id="cbStore"></b><span id="cbMeta"></span></span>
+      <span class="cb-cta">شوف الطلب <svg><use href="#i-arrow"/></svg></span>
+    </button>
+  </div>
+
+  <div class="layer" id="layer"></div>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+</body>
+</html>
