@@ -130,8 +130,6 @@ p { margin: 0; }
 :focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 3px; border-radius: 6px; }
 
 .wrap { width: 100%; max-width: 1180px; margin-inline: auto; padding-inline: var(--gutter); }
-.skip { position: absolute; inset-inline-start: 12px; top: -60px; z-index: 100; background: var(--gold); color: var(--ink); padding: 8px 14px; border-radius: 8px; text-decoration: none; }
-.skip:focus { top: 12px; }
 
 /* ---------- shared bits ---------- */
 .eyebrow {
@@ -218,7 +216,6 @@ p { margin: 0; }
 .nav-install svg { width: 16px; height: 16px; }
 /* narrow phones: the Arabic half of the wordmark makes room for the install button */
 @media (max-width: 399px) { .topbar .wm-rule, .topbar .wm-ar { display: none; } .topbar .wm-en { font-size: 17px; letter-spacing: .18em; } }
-@media (max-width: 339px) { .nav-install span { display: none; } .nav-install { width: 36px; padding: 0; justify-content: center; } }
 .topnav { display: none; gap: 28px; font-size: 15px; }
 .topnav a { text-decoration: none; color: var(--on-dark-2); transition: color .2s; }
 .topnav a:hover { color: var(--gold-hi); }
