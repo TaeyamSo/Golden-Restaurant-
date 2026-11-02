@@ -82,8 +82,16 @@ export function open({ title = '', body = '', foot = '', dialog = null, onMount,
 /** Close via history so back/forward stay in sync. */
 export function close() {
   if (!current) return;
-  if (history.state?.golden === 'sheet') history.back();
-  else finish();
+  if (history.state?.golden === 'sheet') {
+    history.back();
+    // nothing to go back to (the app's first page): close anyway
+    const c = current;
+    setTimeout(() => {
+      if (current !== c) return;
+      history.replaceState(null, '');
+      finish();
+    }, 350);
+  } else finish();
 }
 
 export const isOpen = () => !!current;
@@ -108,6 +116,8 @@ function teardown(c, swapping) {
 }
 
 window.addEventListener('popstate', () => { if (current) finish(); });
+// a reload or a relaunched app can bring back the "sheet open" mark with no sheet on screen: clear it
+if (history.state?.golden === 'sheet') history.replaceState(null, '');
 
 document.addEventListener('keydown', (e) => {
   if (!current) return;
